@@ -1,0 +1,143 @@
+<div class="details-page">
+
+    <!-- Header -->
+    <div class="page-header">
+      <button
+        type="button"
+        class="back-button"
+        (click)="goBack()">
+        ← Back to Certificates
+      </button>
+  
+      <div>
+        <h1>Certificate Details</h1>
+        <p>View the details and current status of your certificate request.</p>
+      </div>
+    </div>
+  
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="state-card">
+        <div class="loader"></div>
+        <p>Loading certificate details...</p>
+      </div>
+    }
+  
+    <!-- Error State -->
+    @else if (hasError) {
+      <div class="state-card error-state">
+        <h3>Certificate not found</h3>
+        <p>
+          We couldn't find the requested certificate.
+        </p>
+  
+        <button
+          type="button"
+          class="primary-button"
+          (click)="goBack()">
+          Back to Certificates
+        </button>
+      </div>
+    }
+  
+    <!-- Certificate Details -->
+    @else if (certificate) {
+      <div class="details-card">
+  
+        <div class="card-header">
+          <div>
+            <h2>{{ certificate.certificateType }}</h2>
+  
+            <span
+              class="status-badge"
+              [class.status-pending]="certificate.status === 'Pending'"
+              [class.status-processing]="certificate.status === 'Processing'"
+              [class.status-done]="certificate.status === 'Done'"
+              [class.status-rejected]="certificate.status === 'Rejected'">
+              {{ certificate.status }}
+            </span>
+          </div>
+        </div>
+  
+        <div class="details-content">
+  
+          <!-- Purpose -->
+          <div class="detail-item">
+            <span class="detail-label">Purpose</span>
+            <p>{{ certificate.purpose }}</p>
+          </div>
+  
+          <!-- Student ID -->
+          <div class="detail-item">
+            <span class="detail-label">Student ID</span>
+            <p>{{ certificate.studentId }}</p>
+          </div>
+  
+          <!-- Requested Date -->
+          <div class="detail-item">
+            <span class="detail-label">Requested Date</span>
+            <p>
+              {{ certificate.requestedAt | date:'dd MMM yyyy, hh:mm a' }}
+            </p>
+          </div>
+  
+          <!-- Processed Date -->
+          @if (certificate.processedAt) {
+            <div class="detail-item">
+              <span class="detail-label">Processed Date</span>
+              <p>
+                {{ certificate.processedAt | date:'dd MMM yyyy, hh:mm a' }}
+              </p>
+            </div>
+          }
+  
+          <!-- Rejection Reason -->
+          @if (certificate.rejectionReason) {
+            <div class="detail-item rejection-detail">
+              <span class="detail-label">Rejection Reason</span>
+              <p>{{ certificate.rejectionReason }}</p>
+            </div>
+          }
+  
+          <!-- Document -->
+          @if (certificate.documentPath) {
+            <div class="detail-item">
+              <span class="detail-label">Document</span>
+  
+              <button
+                type="button"
+                class="document-button">
+                View Document
+              </button>
+            </div>
+          }
+  
+        </div>
+  
+        <div class="card-footer">
+
+            <button
+  class="delete-button"
+  type="button"
+  (click)="deleteCertificate()">
+  Delete Certificate
+</button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="goBack()">
+            Back to Certificates
+          </button>
+          <button
+  class="primary-button"
+  type="button"
+  (click)="editCertificate()">
+  Edit Certificate
+</button>
+        </div>
+  
+      </div>
+    }
+  
+  </div>
