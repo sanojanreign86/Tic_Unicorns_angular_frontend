@@ -1,0 +1,160 @@
+<section class="gym-details-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Gym Details</h1>
+
+      <p>
+        View the selected campus gym information.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()"
+    >
+      Back to Gyms
+    </button>
+
+  </div>
+
+
+  @if (isLoading) {
+
+    <div class="state-card">
+      Loading gym information...
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="state-card error-state">
+
+      <h3>Unable to load gym</h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="loadGym()"
+      >
+        Try Again
+      </button>
+
+    </div>
+
+  } @else if (gym) {
+
+    <div class="details-card">
+
+      <div class="details-header">
+
+        <div>
+
+          <span class="gym-id">
+            Gym #{{ gym.gymId }}
+          </span>
+
+          <h2>
+            {{ gym.name }}
+          </h2>
+
+          @if (gym.isActive) {
+
+            <span class="status active">
+              Active
+            </span>
+
+          } @else {
+
+            <span class="status inactive">
+              Inactive
+            </span>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <div class="details-grid">
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Location
+          </span>
+
+          <span class="detail-value">
+            {{ gym.location }}
+          </span>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Capacity
+          </span>
+
+          <span class="detail-value">
+            {{ gym.capacity }}
+          </span>
+
+        </div>
+
+
+        <div class="detail-item full-width">
+
+          <span class="detail-label">
+            Description
+          </span>
+
+          <span class="detail-value">
+            {{ gym.description }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="edit-button"
+          (click)="editGym()"
+          [disabled]="isDeleting"
+        >
+          Edit Gym
+        </button>
+
+        <button
+          type="button"
+          class="delete-button"
+          (click)="deleteGym()"
+          [disabled]="isDeleting"
+        >
+
+          @if (isDeleting) {
+            Deleting...
+          } @else {
+            Delete Gym
+          }
+
+        </button>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>

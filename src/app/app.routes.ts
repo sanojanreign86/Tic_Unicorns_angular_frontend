@@ -2,6 +2,11 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
+    path: 'gym',
+    loadChildren: () =>
+      import('./features/gym/gym.routes')
+        .then(m => m.GYM_ROUTES)
+  }
     path: 'certificates',
     loadComponent: () =>
       import('./features/certificates/pages/certificate-list/certificate-list')

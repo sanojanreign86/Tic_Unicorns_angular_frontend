@@ -1,0 +1,185 @@
+<section class="gym-form-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>
+        {{ isEditMode ? 'Edit Gym' : 'Add Gym' }}
+      </h1>
+
+      <p>
+        {{
+          isEditMode
+            ? 'Update the selected gym information.'
+            : 'Create a new campus gym facility.'
+        }}
+      </p>
+    </div>
+
+  </div>
+
+  @if (isLoading) {
+
+    <div class="state-card">
+      Loading gym information...
+    </div>
+
+  } @else {
+
+    <div class="form-card">
+
+      @if (errorMessage) {
+        <div class="message error-message">
+          {{ errorMessage }}
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="message success-message">
+          {{ successMessage }}
+        </div>
+      }
+
+      <form
+        [formGroup]="gymForm"
+        (ngSubmit)="saveGym()"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="name">
+              Gym Name
+            </label>
+
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="Example: Main Campus Gym"
+            >
+
+            @if (
+              gymForm.controls.name.touched &&
+              gymForm.controls.name.hasError('required')
+            ) {
+              <small class="validation-message">
+                Gym name is required.
+              </small>
+            }
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="location">
+              Location
+            </label>
+
+            <input
+              id="location"
+              type="text"
+              formControlName="location"
+              placeholder="Example: Sports Complex"
+            >
+
+            @if (
+              gymForm.controls.location.touched &&
+              gymForm.controls.location.hasError('required')
+            ) {
+              <small class="validation-message">
+                Location is required.
+              </small>
+            }
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="capacity">
+              Capacity
+            </label>
+
+            <input
+              id="capacity"
+              type="number"
+              min="1"
+              formControlName="capacity"
+            >
+
+            @if (
+              gymForm.controls.capacity.touched &&
+              gymForm.controls.capacity.invalid
+            ) {
+              <small class="validation-message">
+                Capacity must be at least 1.
+              </small>
+            }
+
+          </div>
+
+
+          <div class="form-group full-width">
+
+            <label for="description">
+              Description
+            </label>
+
+            <textarea
+              id="description"
+              rows="5"
+              formControlName="description"
+              placeholder="Enter gym description"
+            ></textarea>
+
+            @if (
+              gymForm.controls.description.touched &&
+              gymForm.controls.description.hasError('required')
+            ) {
+              <small class="validation-message">
+                Description is required.
+              </small>
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="cancel()"
+            [disabled]="isSubmitting"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="isSubmitting"
+          >
+
+            @if (isSubmitting) {
+              Saving...
+            } @else {
+              {{ isEditMode ? 'Update Gym' : 'Create Gym' }}
+            }
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  }
+
+</section>
