@@ -1,0 +1,110 @@
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8fafc;
+}
+
+th {
+  padding: 14px 16px;
+  text-align: left;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+  padding: 16px;
+  color: #111827;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.role-name {
+  font-weight: 600;
+}
+
+.status-badge,
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.status-badge.inactive {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.type-badge.system {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.type-badge.custom {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.table-state {
+  padding: 48px 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 18px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.edit-button {
+  padding: 7px 12px;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2563eb;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  background: #eff6ff;
+}

@@ -1,0 +1,65 @@
+<div class="table-wrapper">
+
+  @if (isLoading) {
+    <div class="table-state">
+      <p>Loading permissions...</p>
+    </div>
+  }
+
+  @else if (permissions.length === 0) {
+    <div class="table-state empty-state">
+      <h3>No Permissions Found</h3>
+      <p>There are no permissions available.</p>
+    </div>
+  }
+
+  @else {
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Module</th>
+          <th>Description</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (permission of permissions; track permission.permissionId) {
+          <tr>
+            <td>{{ permission.permissionId }}</td>
+
+            <td class="permission-code">
+              {{ permission.code }}
+            </td>
+
+            <td class="permission-name">
+              {{ permission.name }}
+            </td>
+
+            <td>
+              {{ permission.module || '-' }}
+            </td>
+
+            <td>
+              {{ permission.description || '-' }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.active]="permission.isActive"
+                [class.inactive]="!permission.isActive"
+              >
+                {{ permission.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

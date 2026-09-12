@@ -1,0 +1,82 @@
+<div class="table-wrapper">
+
+  @if (isLoading) {
+    <div class="table-state">
+      <p>Loading roles...</p>
+    </div>
+  }
+
+  @else if (roles.length === 0) {
+    <div class="table-state empty-state">
+      <h3>No Roles Found</h3>
+      <p>There are no roles available.</p>
+    </div>
+  }
+
+  @else {
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Role Name</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (role of roles; track role.roleId) {
+          <tr>
+            <td>{{ role.roleId }}</td>
+
+            <td class="role-name">
+              {{ role.roleName }}
+            </td>
+
+            <td>
+              {{ role.description || '-' }}
+            </td>
+
+            <td>
+              <span
+                class="type-badge"
+                [class.system]="role.isSystemRole"
+                [class.custom]="!role.isSystemRole"
+              >
+                {{ role.isSystemRole ? 'System' : 'Custom' }}
+              </span>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.active]="role.isActive"
+                [class.inactive]="!role.isActive"
+              >
+                {{ role.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+
+            <td>
+              {{ role.createdAt | date:'dd MMM yyyy' }}
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="edit-button"
+                (click)="onEdit(role)"
+              >
+                Edit
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

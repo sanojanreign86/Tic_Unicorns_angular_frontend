@@ -1,0 +1,60 @@
+<div class="roles-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Roles</h1>
+      <p>Manage system and custom roles.</p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openCreateForm()"
+    >
+      + Create Role
+    </button>
+  </div>
+
+  @if (successMessage) {
+    <div class="success-message">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">
+      <div>
+        <strong>Unable to complete request</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="retry()"
+      >
+        Retry
+      </button>
+    </div>
+  }
+
+  <app-role-table
+  [roles]="roles"
+  [isLoading]="isLoading"
+  (editRole)="openEditForm($event)"
+/>
+
+  @if (showForm) {
+    <div class="form-overlay">
+      <div class="form-modal">
+        <app-role-form
+          [role]="selectedRole"
+          [isLoading]="isSaving"
+          (formSubmit)="saveRole($event)"
+          (cancel)="closeForm()"
+        />
+      </div>
+    </div>
+  }
+
+</div>
