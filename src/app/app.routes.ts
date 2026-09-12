@@ -25,4 +25,8 @@ export const routes: Routes = [
       import('./features/certificates/pages/certificate-details/certificate-details')
         .then(m => m.CertificateDetails)
   }
+import { authRoutes } from './features/auth/auth.routes';
+
+export const routes: Routes = [
+  ...authRoutes
 ];
