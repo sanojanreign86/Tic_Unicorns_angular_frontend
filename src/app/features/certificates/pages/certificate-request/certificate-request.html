@@ -1,0 +1,128 @@
+<div class="request-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1>Request Certificate</h1>
+        <p>Submit a request for your academic certificate.</p>
+      </div>
+    </div>
+  
+    <!-- Request Form -->
+    <div class="form-card">
+  
+      <form [formGroup]="certificateForm" (ngSubmit)="submitRequest()">
+  
+        <!-- Certificate Type -->
+        <div class="form-group">
+          <label for="certificateType">
+            Certificate Type
+            <span class="required">*</span>
+          </label>
+  
+          <select
+            id="certificateType"
+            formControlName="certificateType"
+            [class.input-error]="
+              certificateType.invalid && certificateType.touched
+            "
+          >
+            <option value="" disabled>Select certificate type</option>
+  
+            @for (type of certificateTypes; track type) {
+              <option [value]="type">
+                {{ type }}
+              </option>
+            }
+          </select>
+  
+          @if (certificateType.invalid && certificateType.touched) {
+            <small class="error-message">
+              Please select a certificate type.
+            </small>
+          }
+        </div>
+  
+        <!-- Purpose -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="purpose">
+              Purpose
+              <span class="required">*</span>
+            </label>
+  
+            <span class="character-count">
+              {{ purpose.value?.length || 0 }}/500
+            </span>
+          </div>
+  
+          <textarea
+            id="purpose"
+            formControlName="purpose"
+            rows="5"
+            maxlength="500"
+            placeholder="Enter the purpose for requesting this certificate"
+            [class.input-error]="
+              purpose.invalid && purpose.touched
+            "
+          ></textarea>
+  
+          @if (purpose.hasError('required') && purpose.touched) {
+            <small class="error-message">
+              Purpose is required.
+            </small>
+          }
+  
+          @if (purpose.hasError('maxlength') && purpose.touched) {
+            <small class="error-message">
+              Purpose cannot exceed 500 characters.
+            </small>
+          }
+        </div>
+  
+        <!-- Success Message -->
+        @if (submitSuccess) {
+          <div class="success-message">
+            Certificate request submitted successfully.
+          </div>
+        }
+  
+        <!-- Error Message -->
+        @if (submitError) {
+          <div class="form-error-message">
+            Unable to submit the certificate request.
+            Please try again.
+          </div>
+        }
+  
+        <!-- Actions -->
+        <div class="form-actions">
+  
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="cancel()"
+            [disabled]="isSubmitting"
+          >
+            Cancel
+          </button>
+  
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="isSubmitting"
+          >
+            @if (isSubmitting) {
+              Submitting...
+            } @else {
+              Submit Request
+            }
+          </button>
+  
+        </div>
+  
+      </form>
+  
+    </div>
+  
+  </div>
