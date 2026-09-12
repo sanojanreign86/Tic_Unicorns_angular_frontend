@@ -1,0 +1,32 @@
+<div class="users-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Users</h1>
+      <p>Manage and view campus portal users.</p>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-message">
+      <div>
+        <strong>Unable to load users</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="retry()"
+      >
+        Retry
+      </button>
+    </div>
+  }
+
+  <app-user-table
+    [users]="users"
+    [isLoading]="isLoading"
+  />
+
+</div>
