@@ -9,6 +9,9 @@ export class StorageService {
   private readonly refreshTokenKey = 'refresh_token';
   private readonly userKey = 'current_user';
 
+  private readonly setupTokenKey = 'password_setup_token';
+  private readonly setupUsernameKey = 'password_setup_username';
+
   setAccessToken(token: string): void {
     localStorage.setItem(this.accessTokenKey, token);
   }
@@ -41,6 +44,27 @@ export class StorageService {
     } catch {
       return null;
     }
+  }
+
+  setPasswordSetupToken(token: string): void {
+    sessionStorage.setItem(this.setupTokenKey, token);
+  }
+
+  getPasswordSetupToken(): string | null {
+    return sessionStorage.getItem(this.setupTokenKey);
+  }
+
+  setPasswordSetupUsername(username: string): void {
+    sessionStorage.setItem(this.setupUsernameKey, username);
+  }
+
+  getPasswordSetupUsername(): string | null {
+    return sessionStorage.getItem(this.setupUsernameKey);
+  }
+
+  removePasswordSetupData(): void {
+    sessionStorage.removeItem(this.setupTokenKey);
+    sessionStorage.removeItem(this.setupUsernameKey);
   }
 
   removeAuthData(): void {
