@@ -1,12 +1,21 @@
 import { Routes } from '@angular/router';
 
+import { authRoutes } from './features/auth/auth.routes';
+
 export const routes: Routes = [
   {
     path: 'gym',
     loadChildren: () =>
       import('./features/gym/gym.routes')
         .then(m => m.GYM_ROUTES)
-  }
+  },
+  {
+    path: 'leave',
+    loadChildren: () =>
+      import('./features/leave/leave.routes')
+        .then(m => m.LEAVE_ROUTES)
+  },
+  {
     path: 'certificates',
     loadComponent: () =>
       import('./features/certificates/pages/certificate-list/certificate-list')
@@ -29,9 +38,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/certificates/pages/certificate-details/certificate-details')
         .then(m => m.CertificateDetails)
-  }
-import { authRoutes } from './features/auth/auth.routes';
-
-export const routes: Routes = [
+  },
   ...authRoutes
 ];
