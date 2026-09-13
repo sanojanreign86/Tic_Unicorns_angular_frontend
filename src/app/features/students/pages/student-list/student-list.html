@@ -1,0 +1,162 @@
+<div class="student-list-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Student Management</h1>
+      <p>View and manage registered students.</p>
+    </div>
+
+    <button
+      type="button"
+      class="create-button"
+      (click)="createStudent()"
+    >
+      + Create Student
+    </button>
+  </div>
+
+  <div class="filter-bar">
+
+    <div class="search-box">
+      <label for="studentSearch">Search Students</label>
+
+      <input
+        id="studentSearch"
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilters()"
+        placeholder="Search by ID, name, email or phone"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="status-filter">
+      <label for="statusFilter">Status</label>
+
+      <select
+        id="statusFilter"
+        [(ngModel)]="statusFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+
+  </div>
+
+  @if (isLoading) {
+    <div class="state-container" role="status">
+      <div class="loading-spinner"></div>
+      <p>Loading students...</p>
+    </div>
+  }
+
+  @if (!isLoading && errorMessage) {
+    <div class="state-container error-state" role="alert">
+      <h3>Unable to load students</h3>
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="retry()"
+      >
+        Try Again
+      </button>
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage && filteredStudents.length > 0) {
+    <div class="table-container">
+
+      <table>
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Admission Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (student of filteredStudents; track student.studentId) {
+            <tr>
+
+              <td>
+                {{ student.studentId }}
+              </td>
+
+              <td>
+                <div class="student-name">
+                  <strong>
+                    {{ student.firstName }} {{ student.lastName }}
+                  </strong>
+                </div>
+              </td>
+
+              <td>
+                {{ student.email || '—' }}
+              </td>
+
+              <td>
+                {{ student.phoneNumber || '—' }}
+              </td>
+
+              <td>
+                {{ student.admissionDate | date:'mediumDate' }}
+              </td>
+
+              <td>
+                <span
+                  class="status-badge"
+                  [class.active]="student.isActive"
+                  [class.inactive]="!student.isActive"
+                >
+                  {{ student.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="view-button"
+                  (click)="viewStudent(student.studentId)"
+                  [attr.aria-label]="'View student ' + student.studentId"
+                >
+                  View
+                </button>
+              </td>
+
+            </tr>
+          }
+        </tbody>
+      </table>
+
+    </div>
+  }
+
+  @if (
+    !isLoading &&
+    !errorMessage &&
+    filteredStudents.length === 0
+  ) {
+    <div class="state-container empty-state">
+      <h3>No students found</h3>
+
+      @if (students.length === 0) {
+        <p>There are no students available.</p>
+      } @else {
+        <p>
+          No students match your current search or status filter.
+        </p>
+      }
+    </div>
+  }
+
+</div>

@@ -44,7 +44,7 @@ export class LoginComponent {
           return;
         }
 
-        this.router.navigate(['/']);
+        this.router.navigate(['/students']);
       },
 
       error: (error) => {
