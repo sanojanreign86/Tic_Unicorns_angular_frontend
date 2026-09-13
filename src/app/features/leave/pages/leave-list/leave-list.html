@@ -1,0 +1,163 @@
+<section class="leave-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Leave Management</h1>
+      <p>View and manage leave requests.</p>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="loadLeaves()"
+        [disabled]="isLoading"
+      >
+        Refresh
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="addLeave()"
+      >
+        Apply Leave
+      </button>
+
+    </div>
+
+  </div>
+
+  @if (isLoading) {
+
+    <div class="state-card">
+      Loading leave requests...
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="state-card">
+
+      <h3>Unable to load leave requests</h3>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        class="primary-button retry-button"
+        (click)="loadLeaves()"
+      >
+        Try Again
+      </button>
+
+    </div>
+
+  } @else if (leaves.length === 0) {
+
+    <div class="state-card">
+
+      <h3>No leave requests found</h3>
+
+      <p>No leave requests are currently available.</p>
+
+      <button
+        type="button"
+        class="primary-button retry-button"
+        (click)="addLeave()"
+      >
+        Apply Leave
+      </button>
+
+    </div>
+
+  } @else {
+
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Leave Type</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (leave of leaves; track leave.leaveId) {
+
+              <tr>
+
+                <td>#{{ leave.leaveId }}</td>
+
+                <td>{{ leave.userId }}</td>
+
+                <td>
+                  <strong>{{ leave.leaveType }}</strong>
+                </td>
+
+                <td>{{ leave.startDate }}</td>
+
+                <td>{{ leave.endDate }}</td>
+
+                <td>
+                  <span
+                    class="status"
+                    [class.pending]="leave.status === 'Pending'"
+                    [class.approved]="leave.status === 'Approved'"
+                    [class.rejected]="leave.status === 'Rejected'"
+                    [class.cancelled]="leave.status === 'Cancelled'"
+                  >
+                    {{ leave.status }}
+                  </span>
+                </td>
+
+                <td>
+
+                  <div class="row-actions">
+
+                    <button
+                      type="button"
+                      class="view-button"
+                      (click)="viewLeave(leave.leaveId)"
+                    >
+                      View
+                    </button>
+
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="editLeave(leave.leaveId)"
+                    >
+                      Edit
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>
