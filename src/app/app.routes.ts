@@ -11,6 +11,12 @@ export const routes: Routes = [
       import('./features/gym/gym.routes')
         .then(m => m.GYM_ROUTES)
   },
+  {
+    path: 'leave',
+    loadChildren: () =>
+      import('./features/leave/leave.routes')
+        .then(m => m.LEAVE_ROUTES)
+  },
 
   {
     path: 'certificates',
@@ -39,6 +45,7 @@ export const routes: Routes = [
       import('./features/certificates/pages/certificate-details/certificate-details')
         .then(m => m.CertificateDetails)
   },
+  ...authRoutes
 
   {
     path: 'identity',

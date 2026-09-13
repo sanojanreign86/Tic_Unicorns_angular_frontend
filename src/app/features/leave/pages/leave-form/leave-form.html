@@ -1,0 +1,180 @@
+<section class="form-page">
+  <div class="page-header">
+    <h1>
+      {{ isEditMode ? 'Edit Leave' : 'Apply Leave' }}
+    </h1>
+
+    <p>
+      {{
+        isEditMode
+          ? 'Update leave request information.'
+          : 'Submit a new leave request.'
+      }}
+    </p>
+  </div>
+
+  @if (isLoading) {
+    <div class="form-card">
+      Loading leave information...
+    </div>
+  } @else {
+    <div class="form-card">
+      @if (errorMessage) {
+        <div class="message error" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="message success" role="status">
+          {{ successMessage }}
+        </div>
+      }
+
+      <form
+        [formGroup]="leaveForm"
+        (ngSubmit)="saveLeave()"
+      >
+        @if (!isEditMode) {
+          <div class="form-group">
+            <label for="userId">User ID</label>
+
+            <input
+              id="userId"
+              type="number"
+              min="1"
+              formControlName="userId"
+            >
+
+            @if (
+              leaveForm.controls.userId.touched &&
+              leaveForm.controls.userId.invalid
+            ) {
+              <small>
+                User ID is required and must be at least 1.
+              </small>
+            }
+          </div>
+        }
+
+        <div class="form-group">
+          <label for="leaveType">Leave Type</label>
+
+          <input
+            id="leaveType"
+            type="text"
+            formControlName="leaveType"
+            placeholder="Example: Medical Leave"
+          >
+
+          @if (
+            leaveForm.controls.leaveType.touched &&
+            leaveForm.controls.leaveType.invalid
+          ) {
+            <small>Leave type is required.</small>
+          }
+        </div>
+
+        <div class="date-grid">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+
+            <input
+              id="startDate"
+              type="date"
+              formControlName="startDate"
+            >
+
+            @if (
+              leaveForm.controls.startDate.touched &&
+              leaveForm.controls.startDate.invalid
+            ) {
+              <small>Start date is required.</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+
+            <input
+              id="endDate"
+              type="date"
+              formControlName="endDate"
+            >
+
+            @if (
+              leaveForm.controls.endDate.touched &&
+              leaveForm.controls.endDate.invalid
+            ) {
+              <small>End date is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reason">Reason</label>
+
+          <textarea
+            id="reason"
+            rows="5"
+            formControlName="reason"
+            placeholder="Enter reason for leave"
+          ></textarea>
+
+          @if (
+            leaveForm.controls.reason.touched &&
+            leaveForm.controls.reason.invalid
+          ) {
+            <small>Reason is required.</small>
+          }
+        </div>
+
+        @if (isEditMode) {
+          <div class="form-group">
+            <label for="status">Status</label>
+
+            <select
+              id="status"
+              formControlName="status"
+            >
+              @for (status of statuses; track status) {
+                <option [value]="status">
+                  {{ status }}
+                </option>
+              }
+            </select>
+
+            @if (
+              leaveForm.controls.status.touched &&
+              leaveForm.controls.status.invalid
+            ) {
+              <small>Status is required.</small>
+            }
+          </div>
+        }
+
+        <div class="actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="cancel()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="isSubmitting"
+          >
+            @if (isSubmitting) {
+              Saving...
+            } @else {
+              {{ isEditMode ? 'Update Leave' : 'Apply Leave' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</section>
