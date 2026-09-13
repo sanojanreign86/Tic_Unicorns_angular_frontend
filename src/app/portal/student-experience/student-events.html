@@ -1,0 +1,75 @@
+<section class="ux-page">
+  <div class="ux-hero">
+    <div>
+      <div class="ux-eyebrow"><span class="ux-icon-box"><app-icon name="events" [size]="17" /></span> CAMPUS EVENTS</div>
+      <h1>Events</h1>
+      <p>Explore campus events, open the details you care about, then register through one guided flow.</p>
+    </div>
+  </div>
+
+  <div class="ux-card">
+    <div class="ux-tabs">
+      <button [class.active]="activeView === 'events'" (click)="activeView='events'; backToEvents()">Events</button>
+      <button [class.active]="activeView === 'registrations'" (click)="activeView='registrations'; selectedEvent=undefined">My registrations</button>
+    </div>
+
+    @if (error) { <div class="ux-message error" style="margin:16px">{{ error }}</div> }
+    @if (success) { <div class="ux-message success" style="margin:16px">{{ success }}</div> }
+
+    @if (loading) {
+      <div class="ux-state"><div class="ux-spinner"></div><h3>Loading events…</h3><p>Getting the latest event and registration information.</p></div>
+    } @else if (activeView === 'events' && !selectedEvent) {
+      <div class="ux-panel">
+        <div class="ux-toolbar" style="margin-bottom:14px"><div><h2 style="margin:0;font-size:16px">Upcoming events</h2><p style="margin:4px 0 0;color:var(--muted);font-size:10.5px">Select an event to see details and registration options.</p></div><label class="ux-field" style="width:min(300px,100%)"><input [(ngModel)]="search" placeholder="Search events" /></label></div>
+        @if (!filteredEvents.length) {
+          <div class="ux-state"><app-icon name="inbox" [size]="24" /><h3>No events found</h3><p>There are no matching active events right now.</p></div>
+        } @else {
+          <div class="ux-grid">
+            @for (event of filteredEvents; track event.eventId) {
+              <button class="ux-card-select" type="button" (click)="selectEvent(event)">
+                <div class="ux-meta"><span class="ux-chip">{{ venueName(event.venueId) }}</span>@if (event.isPaid) { <span class="ux-chip warning">Paid · Rs. {{ event.feeAmount }}</span> } @else { <span class="ux-chip success">Free</span> }</div>
+                <h3>{{ event.eventName }}</h3>
+                <p>{{ event.description || 'Campus event' }}</p>
+                <div class="ux-meta"><span class="ux-chip">{{ formatDate(event.startDateTime) }}</span>@if (event.usesReservedSeating) { <span class="ux-chip">Reserved seating</span> }</div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    } @else if (activeView === 'events' && selectedEvent) {
+      <div class="ux-detail-head">
+        <div><button class="ux-back" (click)="backToEvents()">← All events</button><h2>{{ selectedEvent.eventName }}</h2><p>{{ selectedEvent.description || 'Campus event' }}</p></div>
+        @if (hasActiveRegistration(selectedEvent.eventId)) { <span class="ux-chip success">Already registered</span> } @else { <button class="ux-primary" (click)="startRegistration()">Register for event <app-icon name="arrow-right" [size]="15" /></button> }
+      </div>
+      <div class="ux-detail-body">
+        <div class="ux-grid two" style="margin-bottom:18px">
+          <div class="ux-list-item"><div><h4>When</h4><p>{{ formatDate(selectedEvent.startDateTime) }} → {{ formatDate(selectedEvent.endDateTime) }}</p></div></div>
+          <div class="ux-list-item"><div><h4>Venue</h4><p>{{ venueName(selectedEvent.venueId) }}</p></div></div>
+          <div class="ux-list-item"><div><h4>Registration</h4><p>{{ selectedEvent.usesReservedSeating ? 'Seat selection required' : 'General admission' }}</p></div></div>
+          <div class="ux-list-item"><div><h4>Fee</h4><p>{{ selectedEvent.isPaid ? 'Rs. ' + selectedEvent.feeAmount : 'Free registration' }}</p></div></div>
+        </div>
+
+        @if (flowStep === 'confirm') {
+          <div class="ux-card ux-panel"><div class="ux-stepper"><span class="active"><b>1</b> Review</span><span><b>2</b> Confirm</span></div><h3>Ready to register?</h3><p style="color:var(--text-2);font-size:11.5px">Review the event details, then confirm when you are ready.</p><button class="ux-primary" (click)="register()" [disabled]="actionLoading">{{ actionLoading ? 'Registering…' : 'Confirm registration' }}</button></div>
+        }
+        @if (flowStep === 'seat') {
+          <div class="ux-card ux-panel"><div class="ux-stepper"><span class="active"><b>1</b> Choose seat</span><span><b>2</b> Confirm</span>@if(selectedEvent.isPaid){<span><b>3</b> Payment</span>}</div><h3>Choose your seat</h3><p style="color:var(--text-2);font-size:11.5px">Available seats are shown in blue. Booked or held seats cannot be selected.</p><div class="screen-label">STAGE / SCREEN</div>
+          @if (actionLoading && !seats.length) { <div class="ux-state" style="min-height:140px"><div class="ux-spinner"></div></div> } @else { <div class="seat-grid" [style.grid-template-columns]="'repeat(' + seatColumnCount + ', minmax(46px, 1fr))'">@for (seat of orderedSeats; track seat.eventSeatId) { <button class="seat-button" [class.booked]="!seatAvailable(seat)" [class.selected]="selectedSeatId===seat.eventSeatId" [disabled]="!seatAvailable(seat)" (click)="chooseSeat(seat)">{{ seat.seatNumber }}</button> }</div><div class="seat-legend"><span><i></i>Available</span><span class="selected"><i></i>Selected</span><span class="booked"><i></i>Unavailable</span></div> }
+          <div class="ux-toolbar" style="margin-top:18px"><span class="ux-chip">Selected: {{ selectedSeatLabel() }}</span><button class="ux-primary" (click)="register()" [disabled]="!selectedSeatId || actionLoading">{{ actionLoading ? 'Holding seat…' : 'Confirm seat & continue' }}</button></div></div>
+        }
+        @if (flowStep === 'payment') {
+          <div class="ux-card ux-panel"><div class="ux-stepper"><span class="active"><b>✓</b> Place held</span><span class="active"><b>2</b> Payment</span></div><h3>Complete simulated payment</h3><p style="color:var(--text-2);font-size:11.5px">Amount due: <b>Rs. {{ selectedEvent.feeAmount }}</b>. Your place is held temporarily while you complete payment.</p><button class="ux-primary" (click)="payEvent()" [disabled]="actionLoading">{{ actionLoading ? 'Processing…' : 'Pay & confirm registration' }}</button></div>
+        }
+        @if (flowStep === 'success') {
+          <div class="ux-card ux-state" style="min-height:210px"><span class="ux-icon-box" style="color:var(--success)"><app-icon name="check" [size]="22" /></span><h3>Registration complete</h3><p>{{ success }}</p><button class="ux-secondary" (click)="activeView='registrations'; selectedEvent=undefined; success=''">View my registrations</button></div>
+        }
+      </div>
+    } @else if (activeView === 'registrations') {
+      <div class="ux-panel">
+        <div class="ux-toolbar" style="margin-bottom:14px"><div><h2 style="margin:0;font-size:16px">My registrations</h2><p style="margin:4px 0 0;color:var(--muted);font-size:10.5px">Confirmed, held and past registration history.</p></div></div>
+        @if (!registrations.length) { <div class="ux-state"><app-icon name="inbox" [size]="24" /><h3>No registrations yet</h3><p>Open an event and register when you find one you like.</p></div> }
+        <div class="ux-list">@for (registration of registrations; track registration.eventRegistrationId) { @let event = eventFor(registration); <div class="ux-list-item"><div><h4>{{ event?.eventName || 'Event' }}</h4><p>{{ event ? formatDate(event.startDateTime) : '' }} · {{ venueName(event?.venueId || 0) }}</p></div><div class="ux-meta"><span class="ux-chip" [class.success]="isConfirmed(registration)" [class.danger]="isInactive(registration)">{{ registrationStatus(registration.status) }}</span>@if (canCancel(registration)) { <button class="ux-danger" (click)="cancelRegistration(registration)" [disabled]="actionLoading">Cancel</button> }</div></div> }</div>
+      </div>
+    }
+  </div>
+</section>

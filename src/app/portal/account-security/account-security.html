@@ -1,0 +1,32 @@
+<section class="security-page">
+  <div class="page-head">
+    <span>ACCOUNT</span>
+    <h1>{{ initialSetup ? 'Set your password' : 'Account security' }}</h1>
+    <p>{{ initialSetup ? 'Create a secure password before continuing to the portal.' : 'Change your password and manage active sessions.' }}</p>
+  </div>
+
+  <div class="security-grid">
+    <form class="security-card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="card-head"><div class="shield"><app-icon name="lock" [size]="18" /></div><div><h2>Password</h2><p>Use at least 8 characters.</p></div></div>
+
+      @if (!initialSetup) {
+        <label><span>Current password</span><input type="password" formControlName="currentPassword" autocomplete="current-password" /></label>
+      }
+      <label><span>New password</span><input type="password" formControlName="newPassword" autocomplete="new-password" /></label>
+      <label><span>Confirm new password</span><input type="password" formControlName="confirmNewPassword" autocomplete="new-password" /></label>
+
+      @if (error) { <div class="message error">{{ error }}</div> }
+      @if (message) { <div class="message success">{{ message }}</div> }
+
+      <button class="primary" type="submit" [disabled]="isSaving">{{ isSaving ? 'Updating…' : (initialSetup ? 'Set password' : 'Change password') }}</button>
+    </form>
+
+    @if (!initialSetup) {
+      <aside class="security-card session-card">
+        <div class="card-head"><div class="shield accent"><app-icon name="shield" [size]="18" /></div><div><h2>Active sessions</h2><p>Sign out your account on every device.</p></div></div>
+        <div class="session-note"><strong>Security action</strong><p>Use this if you signed in on a shared device or suspect account access.</p></div>
+        <button class="danger" type="button" (click)="logoutEverywhere()"><app-icon name="logout" [size]="14" /> Sign out all sessions</button>
+      </aside>
+    }
+  </div>
+</section>

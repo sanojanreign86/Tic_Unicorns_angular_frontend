@@ -1,67 +1,60 @@
 <div class="login-page">
-  <div class="login-card">
+  <button class="login-theme-toggle" type="button" [attr.aria-label]="theme.theme() === 'dark' ? 'Use light theme' : 'Use dark theme'" (click)="theme.toggle()">
+    <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="17" />
+  </button>
 
-    <div class="login-header">
-      <h1>Welcome Back</h1>
-      <p>Sign in to your account</p>
+  <section class="login-visual" aria-hidden="true">
+    <div class="brand-lockup">
+      <div class="brand-mark">CU</div>
+      <div><strong>CampusOne</strong><span>University Service Portal</span></div>
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="visual-copy">
+      <span class="eyebrow">ONE CAMPUS · ONE PORTAL</span>
+      <h1>Campus services,<br />without the clutter.</h1>
+      <p>Events, labs, hostels, fees and student services in one secure workspace.</p>
+    </div>
 
-      <div class="form-group">
-        <label for="username">Username</label>
+    <div class="service-strip">
+      <div><b>01</b><span>Student Services</span></div>
+      <div><b>02</b><span>Campus Life</span></div>
+      <div><b>03</b><span>Administration</span></div>
+    </div>
+  </section>
 
-        <input
-          id="username"
-          type="text"
-          formControlName="username"
-          placeholder="Enter your username"
-        />
+  <section class="login-panel">
+    <div class="mobile-brand"><div class="brand-mark">CU</div><strong>CampusOne</strong></div>
 
-        @if (
-          loginForm.controls.username.touched &&
-          loginForm.controls.username.invalid
-        ) {
-          <small class="error-text">
-            Username is required.
-          </small>
-        }
+    <div class="login-card">
+      <div class="login-header">
+        <span class="eyebrow">WELCOME BACK</span>
+        <h2>Sign in to your portal</h2>
+        <p>Use your university account to continue.</p>
       </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <label class="form-group" for="username">
+          <span>Username</span>
+          <input id="username" type="text" formControlName="username" placeholder="Enter your username" autocomplete="username" />
+          @if (loginForm.controls.username.touched && loginForm.controls.username.invalid) { <small class="error-text">Username is required.</small> }
+        </label>
 
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          placeholder="Enter your password"
-        />
+        <label class="form-group" for="password">
+          <span>Password</span>
+          <input id="password" type="password" formControlName="password" placeholder="Enter your password" autocomplete="current-password" />
+          @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) { <small class="error-text">Password is required.</small> }
+        </label>
 
-        @if (
-          loginForm.controls.password.touched &&
-          loginForm.controls.password.invalid
-        ) {
-          <small class="error-text">
-            Password is required.
-          </small>
-        }
-      </div>
+        @if (errorMessage) { <div class="error-message">{{ errorMessage }}</div> }
 
-      @if (errorMessage) {
-        <div class="error-message">
-          {{ errorMessage }}
-        </div>
-      }
+        <button class="login-button" type="submit" [disabled]="isLoading">
+          <span>{{ isLoading ? 'Signing in…' : 'Sign in securely' }}</span>
+          @if (!isLoading) { <app-icon name="arrow-right" [size]="17" /> }
+        </button>
+      </form>
 
-      <button
-        type="submit"
-        [disabled]="isLoading"
-      >
-        {{ isLoading ? 'Signing in...' : 'Sign In' }}
-      </button>
-
-    </form>
-
-  </div>
+      <div class="login-links"><span>New student?</span><a class="register-cta" routerLink="/activate-account">Create student access <app-icon name="arrow-right" [size]="14" /></a></div>
+      <div class="security-note"><app-icon name="shield" [size]="13" /> Protected university account access</div>
+    </div>
+  </section>
 </div>

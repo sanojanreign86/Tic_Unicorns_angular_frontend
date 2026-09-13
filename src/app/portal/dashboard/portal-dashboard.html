@@ -1,0 +1,20 @@
+<section class="dashboard">
+  <div class="welcome-panel">
+    <div class="welcome-copy"><span class="eyebrow">CAMPUS SERVICE PORTAL</span><h1>Good to see you, {{ displayName }}.</h1><p>{{ auth.isAdmin() ? 'Review campus activity and move each service forward from one focused workspace.' : 'Your campus services, bookings and updates — organised around what you need next.' }}</p></div>
+    <div class="role-badge"><app-icon name="user" [size]="14" /> {{ user?.role || 'User' }}</div>
+  </div>
+
+  @if(needsProfileStep){<section class="onboarding-card"><span class="stat-icon"><app-icon name="user" [size]="18"/></span><div><span class="eyebrow">ONE-TIME SETUP</span><h3>Complete hostel eligibility</h3><p>Choose the accommodation eligibility that applies to your profile. This keeps hostel choices relevant and prevents showing the wrong hostel.</p></div><label><select [(ngModel)]="profileGender"><option value="">Choose</option><option value="Male">Male — Boys hostel</option><option value="Female">Female — Girls hostel</option></select></label><button class="ux-primary" [disabled]="profileSaving||!profileGender" (click)="saveProfileStep()">{{profileSaving?'Saving…':'Save profile'}}</button></section>}
+  @if(profileSuccess){<div class="ux-message success">{{profileSuccess}}</div>}
+
+  <div class="stat-grid">@for(item of highlights;track item.label){<article class="stat-card"><div class="stat-top"><span class="stat-icon"><app-icon [name]="item.icon" [size]="17"/></span><span>{{item.label}}</span></div><strong>{{item.value}}</strong><small>{{item.note}}</small></article>}</div>
+
+  @if(auth.isStudent() && (dashboardLoading || upcomingEvents.length)){
+    <section class="live-section"><div class="section-head"><div><span class="eyebrow">UP NEXT</span><h2>My upcoming events</h2></div><a routerLink="/portal/events">Manage registrations</a></div>
+      @if(dashboardLoading){<div class="dashboard-loading">Loading your registrations…</div>}@else{<div class="upcoming-grid">@for(event of upcomingEvents;track event.eventId){<a class="upcoming-card" routerLink="/portal/events"><span class="stat-icon"><app-icon name="events" [size]="16"/></span><div><strong>{{event.eventName}}</strong><small>{{formatDate(event.startDateTime)}}</small></div><app-icon name="arrow-right" [size]="15"/></a>}</div>}
+    </section>
+  }
+
+  <div class="section-head"><div><span class="eyebrow">QUICK ACCESS</span><h2>{{ auth.isAdmin() ? 'Management modules' : 'Student services' }}</h2></div><p>{{ modules.length }} modules available</p></div>
+  <div class="module-grid">@for(module of modules;track module.key){<a class="module-card" [routerLink]="['/portal',module.key]"><div class="module-icon"><app-icon [name]="module.icon" [size]="20"/></div><div class="module-card-copy"><h3>{{module.title}}</h3><p>{{module.subtitle}}</p></div><span class="arrow"><app-icon name="arrow-right" [size]="17"/></span></a>}</div>
+</section>

@@ -1,0 +1,28 @@
+<section class="ux-page">
+  <div class="ux-hero"><div><div class="ux-eyebrow"><span class="ux-icon-box"><app-icon name="labs" [size]="17" /></span> LAB RESERVATIONS</div><h1>Labs</h1><p>Choose a lab first. Booking options appear only when they are relevant to that lab.</p></div></div>
+  <div class="ux-card">
+    <div class="ux-tabs"><button [class.active]="activeView==='labs'" (click)="activeView='labs'; back()">Labs</button><button [class.active]="activeView==='bookings'" (click)="activeView='bookings'; selectedLab=undefined">My bookings</button></div>
+    @if(error){<div class="ux-message error" style="margin:16px">{{error}}</div>} @if(success){<div class="ux-message success" style="margin:16px">{{success}}</div>}
+    @if(loading){<div class="ux-state"><div class="ux-spinner"></div><h3>Loading labs…</h3></div>}
+    @else if(activeView==='labs' && !selectedLab){
+      <div class="ux-panel"><div class="ux-toolbar" style="margin-bottom:14px"><div><h2 style="margin:0;font-size:16px">Available labs</h2><p style="margin:4px 0 0;color:var(--muted);font-size:10.5px">Open a lab to view its booking flow.</p></div><label class="ux-field" style="width:min(300px,100%)"><input [(ngModel)]="search" placeholder="Search labs" /></label></div>
+      <div class="ux-grid">@for(lab of filteredLabs;track lab.labId){<button class="ux-card-select" (click)="openLab(lab)"><div class="ux-meta"><span class="ux-chip">{{lab.labType}}</span><span class="ux-chip success">{{lab.capacity}} capacity</span></div><h3>{{lab.labName}}</h3><p>{{lab.description}}</p><span class="ux-text-button">View lab →</span></button>}</div></div>
+    }
+    @else if(activeView==='labs' && selectedLab){
+      <div class="ux-detail-head"><div><button class="ux-back" (click)="back()">← All labs</button><h2>{{selectedLab.labName}}</h2><p>{{selectedLab.description}}</p></div><button class="ux-primary" (click)="startBooking()">Book this lab <app-icon name="arrow-right" [size]="15" /></button></div>
+      <div class="ux-detail-body">
+        <div class="ux-grid two" style="margin-bottom:18px"><div class="ux-list-item"><div><h4>Lab type</h4><p>{{selectedLab.labType}}</p></div></div><div class="ux-list-item"><div><h4>Capacity</h4><p>{{selectedLab.capacity}} students / workstations</p></div></div></div>
+        @if(bookingOpen){<div class="ux-card ux-panel"><div class="ux-stepper"><span class="active"><b>1</b> Date & time</span><span [class.active]="availability"><b>2</b> {{isComputerLab?'Choose computer':'Check availability'}}</span><span><b>3</b> Confirm</span></div>
+          <div class="ux-form-grid" style="margin-top:18px"><label class="ux-field"><span>Booking date</span><input type="date" [(ngModel)]="bookingDate" (change)="availability=undefined;selectedSeatId=undefined" /></label><label class="ux-field"><span>Available time slot</span><select [(ngModel)]="selectedSlotId" (change)="availability=undefined;selectedSeatId=undefined"><option [ngValue]="undefined">Select a time slot</option>@for(slot of slots;track slot.timeSlotId){<option [ngValue]="slot.timeSlotId">{{formatTime(slot.startTime)}} - {{formatTime(slot.endTime)}}</option>}</select></label></div>
+          <button class="ux-secondary" style="margin-top:14px" (click)="checkAvailability()" [disabled]="!selectedSlotId||!bookingDate||actionLoading">{{actionLoading?'Checking…':'Check availability'}}</button>
+          @if(availability){<div style="margin-top:18px">@if(availability.isFull){<div class="ux-message error">This time slot is full. Choose another slot.</div>} @else if(isComputerLab){<h3>Choose an available computer</h3><p style="color:var(--text-2);font-size:11px">{{availability.message}}</p><div class="screen-label">COMPUTER LAB WORKSTATIONS</div><div class="seat-grid">@for(seat of availability.seats;track seat.labSeatId){<button class="seat-button" [class.booked]="!seatAvailable(seat)" [class.selected]="selectedSeatId===seat.labSeatId" [disabled]="!seatAvailable(seat)" (click)="chooseSeat(seat)">{{seat.seatNumber}}</button>}</div><div class="seat-legend"><span><i></i>Available</span><span class="selected"><i></i>Selected</span><span class="booked"><i></i>Unavailable</span></div>} @else {<div class="ux-message success">{{availability.availableCount}} of {{availability.capacity}} places are available for this slot.</div>}
+          <div class="ux-toolbar" style="margin-top:18px">@if(isComputerLab){<span class="ux-chip">Selected: {{selectedSeatLabel()}}</span>}<button class="ux-primary" (click)="confirmBooking()" [disabled]="availability.isFull||(isComputerLab&&!selectedSeatId)||actionLoading">{{actionLoading?'Booking…':'Confirm booking'}}</button></div></div>}
+        </div>}
+      </div>
+    }
+    @else if(activeView==='bookings'){
+      <div class="ux-panel"><div class="ux-toolbar" style="margin-bottom:14px"><div><h2 style="margin:0;font-size:16px">My lab bookings</h2><p style="margin:4px 0 0;color:var(--muted);font-size:10.5px">Only useful booking information is shown.</p></div></div>
+      @if(!bookings.length){<div class="ux-state"><app-icon name="inbox" [size]="24"/><h3>No lab bookings yet</h3></div>}<div class="ux-list">@for(booking of bookings;track booking.labBookingId){<div class="ux-list-item"><div><h4>{{labName(booking.labId)}}</h4><p>{{formatDate(booking.bookingDate)}} · {{formatTime(booking.startTime)}} - {{formatTime(booking.endTime)}}</p></div><div class="ux-meta"><span class="ux-chip" [class.danger]="booking.status.toLowerCase()==='cancelled'">{{booking.status}}</span>@if(booking.status.toLowerCase()!=='cancelled'){<button class="ux-danger" (click)="cancelBooking(booking)" [disabled]="actionLoading">Cancel</button>}</div></div>}</div></div>
+    }
+  </div>
+</section>

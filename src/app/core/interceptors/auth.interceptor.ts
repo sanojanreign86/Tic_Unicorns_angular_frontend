@@ -6,20 +6,21 @@ import { StorageService } from '../services/storage.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(StorageService);
 
-  const isPasswordSetupRequest =
-    req.url.includes('/Auth/set-initial-password');
+  // Preserve explicit Authorization headers such as the one-time setup token
+  // used during first-time student activation.
+  if (req.headers.has('Authorization')) {
+    return next(req);
+  }
 
-  const token = isPasswordSetupRequest
-    ? storage.getPasswordSetupToken()
-    : storage.getAccessToken();
+  const accessToken = storage.getAccessToken();
 
-  if (!token) {
+  if (!accessToken) {
     return next(req);
   }
 
   const authReq = req.clone({
     setHeaders: {
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${accessToken}`
     }
   });
 

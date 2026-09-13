@@ -1,0 +1,77 @@
+<div class="portal-shell">
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="brand-row">
+      <div class="brand-mark">CU</div>
+      <div class="brand-copy"><strong>CampusOne</strong><span>Service Portal</span></div>
+      <button class="icon-button mobile-close" type="button" aria-label="Close navigation" (click)="closeSidebar()">
+        <app-icon name="close" [size]="18" />
+      </button>
+    </div>
+
+    <nav class="nav-scroll" aria-label="Portal navigation">
+      <span class="nav-section">Overview</span>
+      <a routerLink="/portal/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="nav-icon"><app-icon name="dashboard" [size]="17" /></span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+
+      <span class="nav-section">{{ auth.isAdmin() ? 'Management' : 'Services' }}</span>
+      @for (module of modules; track module.key) {
+        <a [routerLink]="['/portal', module.key]" routerLinkActive="active" (click)="closeSidebar()">
+          <span class="nav-icon"><app-icon [name]="module.icon" [size]="17" /></span>
+          <span class="nav-label">{{ module.title }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="mini-profile">
+        <div class="avatar">{{ (user?.username || 'U').charAt(0).toUpperCase() }}</div>
+        <div class="mini-profile-copy"><strong>{{ user?.username || 'User' }}</strong><span>{{ user?.role || 'Account' }}</span></div>
+      </div>
+    </div>
+  </aside>
+
+  @if (sidebarOpen) {
+    <button class="sidebar-overlay" type="button" aria-label="Close menu" (click)="closeSidebar()"></button>
+  }
+
+  <main class="main-column">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-button menu-button" type="button" aria-label="Open navigation" (click)="toggleSidebar()">
+          <app-icon name="menu" [size]="19" />
+        </button>
+        <div class="breadcrumb"><span>CampusOne</span><b>/</b><strong>{{ auth.isAdmin() ? 'Admin workspace' : 'Student workspace' }}</strong></div>
+      </div>
+
+      <div class="topbar-right">
+        <button class="icon-button theme-button" type="button" [attr.aria-label]="theme.theme() === 'dark' ? 'Use light theme' : 'Use dark theme'" (click)="toggleTheme()">
+          <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="17" />
+        </button>
+
+        <a class="icon-button notification-button" routerLink="/portal/notifications" aria-label="Notifications">
+          <app-icon name="notifications" [size]="17" />@if (unreadCount) { <span class="notification-count">{{ unreadCount > 9 ? '9+' : unreadCount }}</span> }
+        </a>
+
+        <div class="profile-menu">
+          <button class="profile-button" type="button" (click)="toggleProfile()">
+            <span class="avatar small">{{ (user?.username || 'U').charAt(0).toUpperCase() }}</span>
+            <span class="profile-copy"><strong>{{ user?.username }}</strong><small>{{ user?.role }}</small></span>
+            <app-icon name="chevron-down" [size]="15" />
+          </button>
+
+          @if (profileOpen) {
+            <div class="profile-popover">
+              <div class="popover-user"><strong>{{ user?.username }}</strong><span>{{ user?.role }} account</span></div>
+              <a routerLink="/portal/account-security" (click)="profileOpen = false"><app-icon name="lock" [size]="15" /> Account security</a>
+              <button type="button" (click)="logout()"><app-icon name="logout" [size]="15" /> Sign out</button>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="page-stage"><router-outlet /></div>
+  </main>
+</div>

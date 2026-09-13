@@ -1,0 +1,192 @@
+@if (moduleKey === 'notifications') {
+  <app-student-notifications />
+} @else if (auth.isStudent() && moduleKey === 'events') {
+  <app-student-events />
+} @else if (auth.isStudent() && moduleKey === 'labs') {
+  <app-student-labs />
+} @else if (auth.isStudent() && moduleKey === 'hostels') {
+  <app-student-hostels />
+} @else if (auth.isStudent() && moduleKey === 'canteen') {
+  <app-student-canteen />
+} @else if (auth.isStudent() && moduleKey === 'certificates') {
+  <app-student-certificates />
+} @else if (auth.isStudent() && moduleKey === 'complaints') {
+  <app-student-complaints />
+} @else if (auth.isStudent() && moduleKey === 'fees') {
+  <app-student-fees />
+} @else if (auth.isStudent() && moduleKey === 'gym') {
+  <app-student-gym />
+} @else if (auth.isStudent() && moduleKey === 'leave') {
+  <app-student-leave />
+} @else if (auth.isStudent() && moduleKey === 'sports') {
+  <app-student-sports />
+} @else if (auth.isAdmin() && moduleKey === 'events') {
+  <app-admin-events />
+} @else if (auth.isAdmin() && moduleKey === 'labs') {
+  <app-admin-labs />
+} @else if (auth.isAdmin() && moduleKey === 'hostels') {
+  <app-admin-hostels />
+} @else if (auth.isAdmin() && moduleKey === 'students') {
+  <app-admin-students />
+} @else if (auth.isAdmin() && moduleKey === 'canteen') {
+  <app-admin-canteen />
+} @else if (auth.isAdmin() && moduleKey === 'sports') {
+  <app-admin-sports />
+} @else if (auth.isAdmin() && moduleKey === 'system-settings') {
+  <app-admin-system-settings />
+} @else if (auth.isAdmin() && moduleKey === 'gym') {
+  <app-admin-gym />
+} @else {
+@if (config) {
+  <section class="module-page">
+    <div class="hero-row">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="module-mark"><app-icon [name]="config.icon" [size]="17" /></span> CAMPUS SERVICE</div>
+        <h1>{{ config.title }}</h1>
+        <p>{{ config.subtitle }}</p>
+      </div>
+      <div class="hero-actions">
+        @if (actions.length) {
+          @for (action of actions; track action.label) {
+            <button class="action-button" [class.secondary]="action.tone === 'secondary'" [class.danger]="action.tone === 'danger'" (click)="openAction(action)">
+              <app-icon name="plus" [size]="15" />{{ action.label }}
+            </button>
+          }
+        }
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <article class="summary-card">
+        <span class="summary-icon"><app-icon name="dashboard" [size]="17" /></span>
+        <div><span class="summary-label">Available views</span><strong>{{ resources.length }}</strong><small>Based on your {{ auth.getRole() || 'current' }} role</small></div>
+      </article>
+      <article class="summary-card">
+        <span class="summary-icon"><app-icon name="inbox" [size]="17" /></span>
+        <div><span class="summary-label">Current records</span><strong>{{ rows.length }}</strong><small>{{ activeResource?.label ?? 'No resource selected' }}</small></div>
+      </article>
+      <article class="summary-card">
+        <span class="summary-icon"><app-icon [name]="loadError ? 'alert' : 'check'" [size]="17" /></span>
+        <div><span class="summary-label">Workspace status</span><strong class="status-ok" [class.status-check]="loadError">{{ loadError ? 'Needs attention' : 'Ready' }}</strong><small>{{ lastUpdated ? 'Updated ' + lastUpdated : 'Up to date' }}</small></div>
+      </article>
+    </div>
+
+    <div class="workspace-card">
+      <div class="resource-tabs" role="tablist">
+        @for (resource of resources; track resource.label) {
+          <button type="button" [class.active]="resource === activeResource" (click)="loadResource(resource)">{{ resource.label }}</button>
+        }
+      </div>
+
+      <div class="workspace-toolbar">
+        <div class="workspace-heading">
+          <h2>{{ activeResource?.label }}</h2>
+          @if (activeResource?.hint) { <p>{{ activeResource?.hint }}</p> }
+        </div>
+        <div class="toolbar-controls">
+          <label class="search-box">
+            <app-icon name="search" [size]="15" />
+            <input [(ngModel)]="searchTerm" (ngModelChange)="applySearch()" placeholder="Search records" />
+          </label>
+          <button class="ghost-button refresh-button" type="button" (click)="refresh()"><app-icon name="refresh" [size]="14" /> Refresh</button>
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="state-panel loading-state">
+          <div class="spinner"></div>
+          <strong>Loading {{ activeResource?.label }}…</strong>
+          <p>Loading the latest information.</p>
+        </div>
+      } @else if (loadError) {
+        <div class="state-panel error-state">
+          <div class="state-icon"><app-icon name="alert" [size]="20" /></div>
+          <strong>Unable to load data</strong>
+          <p>{{ loadError }}</p>
+          <button type="button" class="ghost-button" (click)="refresh()"><app-icon name="refresh" [size]="14" /> Try again</button>
+        </div>
+      } @else if (!filteredRows.length) {
+        <div class="state-panel empty-state">
+          <div class="state-icon"><app-icon name="inbox" [size]="20" /></div>
+          <strong>No records found</strong>
+          <p>{{ searchTerm ? 'Try a different search.' : 'There is nothing to show in this view yet.' }}</p>
+        </div>
+      } @else {
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                @for (column of columns; track column) { <th>{{ columnLabel(column) }}</th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of filteredRows; track $index) {
+                <tr>
+                  @for (column of columns; track column) {
+                    <td>
+                      @if (column.toLowerCase().includes('status')) {
+                        <span class="status-pill">{{ displayValue(row[column]) }}</span>
+                      } @else {
+                        <span class="cell-text">{{ displayValue(row[column]) }}</span>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">Showing {{ filteredRows.length }} of {{ rows.length }} records</div>
+      }
+    </div>
+  </section>
+
+  @if (selectedAction) {
+    <div class="modal-backdrop" (click)="closeAction()">
+      <section class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <span class="eyebrow">{{ config.title }}</span>
+            <h2>{{ selectedAction.label }}</h2>
+          </div>
+          <button class="close-button" type="button" aria-label="Close dialog" (click)="closeAction()"><app-icon name="close" [size]="17" /></button>
+        </div>
+
+        <div class="modal-body">
+          @for (field of selectedAction.fields ?? []; track field.key) {
+            <label class="form-field" [class.checkbox-field]="field.type === 'boolean'">
+              @if (field.type === 'boolean') {
+                <input type="checkbox" [(ngModel)]="actionValues[field.key]" />
+                <span>{{ field.label }}</span>
+              } @else {
+                <span>{{ field.label }} @if (field.required) { <b>*</b> }</span>
+                @if (field.type === 'textarea') {
+                  <textarea rows="4" [(ngModel)]="actionValues[field.key]" [placeholder]="field.placeholder ?? ''"></textarea>
+                } @else if (field.type === 'select') {
+                  <select [(ngModel)]="actionValues[field.key]">
+                    <option value="">Choose {{ field.label.toLowerCase() }}</option>
+                    @for (option of actionOptions[field.key]; track option.value) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                } @else {
+                  <input [type]="fieldInputType(field)" [(ngModel)]="actionValues[field.key]" [placeholder]="field.placeholder ?? ''" />
+                }
+              }
+            </label>
+          }
+
+          @if (actionError) { <div class="inline-message error-message">{{ actionError }}</div> }
+          @if (actionSuccess) { <div class="inline-message success-message">{{ actionSuccess }}</div> }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="ghost-button" (click)="closeAction()">Close</button>
+          <button type="button" class="action-button" [disabled]="isSubmitting" (click)="submitAction()">{{ isSubmitting ? 'Saving…' : selectedAction.label }}</button>
+        </div>
+      </section>
+    </div>
+  }
+}
+
+}

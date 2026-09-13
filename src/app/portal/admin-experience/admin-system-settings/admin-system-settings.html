@@ -1,0 +1,51 @@
+<section class="admin-page">
+  <div class="admin-hero">
+    <div><div class="ux-eyebrow"><span class="ux-icon-box"><app-icon name="system-settings" [size]="17"/></span> SYSTEM CONTROL</div><h1>System Settings</h1><p>Change application behaviour through clear controls instead of editing raw configuration values.</p></div>
+    <button class="ux-primary" (click)="createModal=true"><app-icon name="plus" [size]="14"/> Create setting</button>
+  </div>
+  @if(error){<div class="ux-message error">{{error}}</div>}
+  @if(success){<div class="ux-message success">{{success}}</div>}
+  @if(loading){<div class="ux-state"><div class="ux-spinner"></div><p>Loading system settings…</p></div>}
+  @else{
+    <section class="ux-card admin-section">
+      <div class="admin-section-head"><div><h2>Reservation behaviour</h2><p>This value controls how long a temporary reservation can be held before it expires.</p></div></div>
+      <div class="setting-feature-card">
+        <div class="setting-feature-copy"><span class="ux-chip success">Active control</span><h3>Reservation hold duration</h3><p>Used by time-sensitive reservation flows such as reserved event seats and hostel bed holds where supported.</p></div>
+        <div class="stepper-control">
+          <button type="button" (click)="increment(-1)" aria-label="Decrease">−</button>
+          <label><input type="number" min="1" max="60" [(ngModel)]="holdMinutes"/><span>minutes</span></label>
+          <button type="button" (click)="increment(1)" aria-label="Increase">+</button>
+        </div>
+        <button class="ux-primary" [disabled]="saving || holdMinutes===originalHoldMinutes" (click)="saveHold()">{{saving?'Saving…':'Save duration'}}</button>
+      </div>
+    </section>
+
+    <section class="ux-card admin-section">
+      <div class="admin-section-head"><div><h2>Application settings</h2><p>Open a setting to update its value or availability.</p></div></div>
+      <div class="admin-list">
+        @for(s of settings;track s.settingId){
+          <button class="admin-row" (click)="openEdit(s)">
+            <div><strong>{{humanKey(s.key)}}</strong><small>{{s.description||'Application setting'}}</small></div>
+            <div class="admin-cell"><b>{{s.value}}</b></div>
+            <div class="admin-cell"><span class="ux-chip" [class.success]="s.isActive">{{s.isActive?'Active':'Inactive'}}</span></div>
+            <div class="admin-cell hide-lg">Edit setting</div><span class="admin-arrow"><app-icon name="arrow-right" [size]="15"/></span>
+          </button>
+        }
+      </div>
+    </section>
+  }
+</section>
+@if(editModal&&selected){
+  <div class="ux-modal-backdrop" (click)="editModal=false"><section class="ux-modal" (click)="$event.stopPropagation()">
+    <div class="ux-modal-head"><div><span class="ux-eyebrow">SYSTEM SETTING</span><h2>{{humanKey(selected.key)}}</h2></div><button class="ux-close" (click)="editModal=false"><app-icon name="close" [size]="16"/></button></div>
+    <div class="ux-modal-body"><div class="ux-form"><label class="ux-field"><span>Value</span><input [(ngModel)]="editForm.value"/></label><label class="ux-field"><span>Description</span><textarea rows="4" [(ngModel)]="editForm.description"></textarea></label><div class="context-note">Status: <b>{{selected.isActive?'Active':'Inactive'}}</b></div></div></div>
+    <div class="ux-modal-foot"><button class="ux-danger" (click)="toggleActive(selected);editModal=false">{{selected.isActive?'Deactivate':'Activate'}}</button><button class="ux-secondary" (click)="editModal=false">Cancel</button><button class="ux-primary" [disabled]="saving" (click)="saveEdit()">Save changes</button></div>
+  </section></div>
+}
+@if(createModal){
+  <div class="ux-modal-backdrop" (click)="createModal=false"><section class="ux-modal" (click)="$event.stopPropagation()">
+    <div class="ux-modal-head"><h2>Create setting</h2><button class="ux-close" (click)="createModal=false"><app-icon name="close" [size]="16"/></button></div>
+    <div class="ux-modal-body"><div class="ux-form"><label class="ux-field"><span>Setting key</span><input [(ngModel)]="createForm.key" placeholder="Example: ReservationHoldMinutes"/></label><label class="ux-field"><span>Value</span><input [(ngModel)]="createForm.value"/></label><label class="ux-field"><span>Description</span><textarea rows="4" [(ngModel)]="createForm.description"></textarea></label></div></div>
+    <div class="ux-modal-foot"><button class="ux-secondary" (click)="createModal=false">Cancel</button><button class="ux-primary" [disabled]="saving" (click)="create()">Create setting</button></div>
+  </section></div>
+}

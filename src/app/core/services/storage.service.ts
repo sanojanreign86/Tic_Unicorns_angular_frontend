@@ -4,36 +4,38 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class StorageService {
-
   private readonly accessTokenKey = 'access_token';
   private readonly refreshTokenKey = 'refresh_token';
   private readonly userKey = 'current_user';
 
-  private readonly setupTokenKey = 'password_setup_token';
-  private readonly setupUsernameKey = 'password_setup_username';
-
+  // Authentication is intentionally kept in sessionStorage.
+  // This prevents an Admin tab and a Student tab from overwriting each
+  // other's token/role because localStorage is shared across browser tabs.
   setAccessToken(token: string): void {
-    localStorage.setItem(this.accessTokenKey, token);
+    sessionStorage.setItem(this.accessTokenKey, token);
+    localStorage.removeItem(this.accessTokenKey);
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem(this.accessTokenKey);
+    return sessionStorage.getItem(this.accessTokenKey);
   }
 
   setRefreshToken(token: string): void {
-    localStorage.setItem(this.refreshTokenKey, token);
+    sessionStorage.setItem(this.refreshTokenKey, token);
+    localStorage.removeItem(this.refreshTokenKey);
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(this.refreshTokenKey);
+    return sessionStorage.getItem(this.refreshTokenKey);
   }
 
   setUser<T>(user: T): void {
-    localStorage.setItem(this.userKey, JSON.stringify(user));
+    sessionStorage.setItem(this.userKey, JSON.stringify(user));
+    localStorage.removeItem(this.userKey);
   }
 
   getUser<T>(): T | null {
-    const user = localStorage.getItem(this.userKey);
+    const user = sessionStorage.getItem(this.userKey);
 
     if (!user) {
       return null;
@@ -46,34 +48,18 @@ export class StorageService {
     }
   }
 
-  setPasswordSetupToken(token: string): void {
-    sessionStorage.setItem(this.setupTokenKey, token);
-  }
-
-  getPasswordSetupToken(): string | null {
-    return sessionStorage.getItem(this.setupTokenKey);
-  }
-
-  setPasswordSetupUsername(username: string): void {
-    sessionStorage.setItem(this.setupUsernameKey, username);
-  }
-
-  getPasswordSetupUsername(): string | null {
-    return sessionStorage.getItem(this.setupUsernameKey);
-  }
-
-  removePasswordSetupData(): void {
-    sessionStorage.removeItem(this.setupTokenKey);
-    sessionStorage.removeItem(this.setupUsernameKey);
-  }
-
   removeAuthData(): void {
+    sessionStorage.removeItem(this.accessTokenKey);
+    sessionStorage.removeItem(this.refreshTokenKey);
+    sessionStorage.removeItem(this.userKey);
+
+    // Remove legacy auth keys from earlier frontend versions as well.
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.refreshTokenKey);
     localStorage.removeItem(this.userKey);
   }
 
   clear(): void {
-    localStorage.clear();
+    this.removeAuthData();
   }
 }

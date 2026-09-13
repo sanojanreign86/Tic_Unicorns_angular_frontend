@@ -1,24 +1,32 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { AppIconComponent } from '../../../shared/components/app-icon/app-icon';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, AppIconComponent],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
 export class LoginComponent {
-
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  readonly theme = inject(ThemeService);
 
   isLoading = false;
   errorMessage = '';
+
+  constructor() {
+    const username = this.route.snapshot.queryParamMap.get('username');
+    if (username) queueMicrotask(() => this.loginForm.controls.username.setValue(username));
+  }
 
   loginForm = this.fb.nonNullable.group({
     username: ['', Validators.required],
@@ -39,20 +47,21 @@ export class LoginComponent {
         this.isLoading = false;
 
         if (response.mustChangePassword) {
-          // Password setup page will be added later.
-          console.log('Password change required');
+          void this.router.navigate(['/portal/account-security'], { queryParams: { initial: '1' } });
           return;
         }
 
-        this.router.navigate(['/students']);
+        const role = (response.role ?? '').trim().toLowerCase();
+        if (role === 'admin' || role === 'student') {
+          void this.router.navigate(['/portal/dashboard']);
+        } else {
+          this.authService.logoutLocal();
+          this.errorMessage = 'This account role is not supported by the portal.';
+        }
       },
-
       error: (error) => {
         this.isLoading = false;
-
-        this.errorMessage =
-          error?.error?.message ||
-          'Login failed. Please check your username and password.';
+        this.errorMessage = error?.error?.message || 'Login failed. Please check your username and password.';
       }
     });
   }

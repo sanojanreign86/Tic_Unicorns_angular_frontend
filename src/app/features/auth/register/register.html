@@ -1,0 +1,50 @@
+<div class="activation-page">
+  <section class="activation-shell">
+    <a class="activation-brand" routerLink="/login"><span class="brand-mark">CU</span><span><strong>CampusOne</strong><small>New student setup</small></span></a>
+
+    <div class="activation-card">
+      <div class="activation-progress" aria-label="Account activation progress">
+        <span [class.active]="step >= 1"><b>1</b> Verify identity</span>
+        <i></i>
+        <span [class.active]="step >= 2"><b>2</b> Verify OTP</span>
+        <i></i>
+        <span [class.active]="step >= 3"><b>3</b> Password</span>
+      </div>
+
+      @if (step === 1) {
+        <div class="activation-copy"><span class="eyebrow">FIRST TIME HERE?</span><h1>Create your student access</h1><p>Use the student number and mobile number registered with your university.</p></div>
+        <form [formGroup]="identityForm" (ngSubmit)="sendOtp()" class="activation-form">
+          <label><span>University student number</span><input formControlName="universityStudentId" placeholder="e.g. UNI2026004" autocomplete="username" /></label>
+          <label><span>Registered mobile number</span><input formControlName="mobileNumber" placeholder="e.g. 0771234567" inputmode="tel" autocomplete="tel" /></label>
+          <button class="ux-primary wide" type="submit" [disabled]="isLoading">{{ isLoading ? 'Sending OTP…' : 'Send verification code' }} <app-icon name="arrow-right" [size]="16" /></button>
+        </form>
+      }
+
+      @if (step === 2) {
+        <div class="activation-copy"><span class="eyebrow">MOBILE VERIFICATION</span><h1>Enter your verification code</h1><p>Enter the OTP sent to <b>{{ identityForm.value.mobileNumber }}</b>. The code is time-limited.</p></div>
+        <form [formGroup]="otpForm" (ngSubmit)="verifyOtp()" class="activation-form">
+          <label><span>OTP code</span><input class="otp-input" formControlName="otp" maxlength="8" inputmode="numeric" placeholder="••••••" autocomplete="one-time-code" /></label>
+          <button class="ux-primary wide" type="submit" [disabled]="isLoading">{{ isLoading ? 'Verifying…' : 'Verify OTP' }}</button>
+          <div class="activation-inline-actions"><button type="button" (click)="resendOtp()" [disabled]="isLoading">Resend OTP</button><button type="button" (click)="backToIdentity()">Change details</button></div>
+        </form>
+      }
+
+      @if (step === 3) {
+        <div class="activation-copy"><span class="eyebrow">SECURE YOUR ACCOUNT</span><h1>Create your permanent password</h1><p>Choose a password with at least 8 characters. You will use it for future sign-ins.</p></div>
+        <form [formGroup]="passwordForm" (ngSubmit)="createPassword()" class="activation-form">
+          <label><span>New password</span><input type="password" formControlName="newPassword" autocomplete="new-password" placeholder="Minimum 8 characters" /></label>
+          <label><span>Confirm password</span><input type="password" formControlName="confirmNewPassword" autocomplete="new-password" placeholder="Re-enter your password" /></label>
+          <button class="ux-primary wide" type="submit" [disabled]="isLoading">{{ isLoading ? 'Creating account…' : 'Create password & continue' }}</button>
+        </form>
+      }
+
+      @if (step === 4) {
+        <div class="activation-success"><span class="success-orb"><app-icon name="check" [size]="28" /></span><span class="eyebrow">ACCOUNT READY</span><h1>Your account is ready.</h1><p>Your permanent password has been created. Continue to sign in if automatic sign-in was not completed.</p><button class="ux-primary wide" type="button" (click)="goToLogin()">Continue to sign in <app-icon name="arrow-right" [size]="16" /></button></div>
+      }
+
+      @if (errorMessage) { <div class="auth-message error">{{ errorMessage }}</div> }
+      @if (infoMessage && step !== 4) { <div class="auth-message info">{{ infoMessage }}</div> }
+      @if (step !== 4) { <p class="activation-login-link">Already activated? <a routerLink="/login">Sign in</a></p> }
+    </div>
+  </section>
+</div>

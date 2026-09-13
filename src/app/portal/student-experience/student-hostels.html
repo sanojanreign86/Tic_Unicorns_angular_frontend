@@ -1,0 +1,265 @@
+<section class="ux-page">
+  <div class="ux-hero">
+    <div>
+      <div class="ux-eyebrow">
+        <span class="ux-icon-box"><app-icon name="hostels" [size]="17"></app-icon></span>
+        HOSTEL ACCOMMODATION
+      </div>
+      <h1>Hostels</h1>
+      <p>
+        Find an eligible hostel, choose an available room and bed, then follow your application through allocation and payment.
+      </p>
+    </div>
+  </div>
+
+  <div class="ux-card">
+    <div class="ux-tabs">
+      <button [class.active]="activeView === 'hostels'" (click)="activeView = 'hostels'">Find a hostel</button>
+      <button [class.active]="activeView === 'applications'" (click)="activeView = 'applications'">My applications</button>
+      <button [class.active]="activeView === 'allocations'" (click)="activeView = 'allocations'">My allocation</button>
+    </div>
+
+    @if (error) {
+      <div class="ux-message error" style="margin: 16px">{{ error }}</div>
+    }
+
+    @if (success) {
+      <div class="ux-message success" style="margin: 16px">{{ success }}</div>
+    }
+
+    @if (loading) {
+      <div class="ux-state">
+        <div class="ux-spinner"></div>
+        <h3>Loading hostel options…</h3>
+      </div>
+    } @else if (activeView === 'hostels') {
+      @if (!selectedHostel) {
+        <div class="ux-panel">
+          <div style="margin-bottom: 15px">
+            <h2 style="margin: 0; font-size: 16px">Eligible hostel options</h2>
+            <p style="margin: 4px 0 0; color: var(--muted); font-size: 10.5px">
+              Only hostels relevant to your student profile are shown.
+            </p>
+          </div>
+
+          @if (!hasSavedEligibility) {
+            <div class="ux-card ux-panel profile-gate">
+              <span class="ux-icon-box"><app-icon name="user" [size]="20"></app-icon></span>
+              <div><h3>One quick profile step</h3><p>Choose the accommodation eligibility that applies to your student profile. You only need to do this once.</p></div>
+              <label class="ux-field"><span>Hostel eligibility</span><select [(ngModel)]="profileGender"><option value="">Choose</option><option value="Male">Male — Boys hostel</option><option value="Female">Female — Girls hostel</option></select></label>
+              <button class="ux-primary" [disabled]="profileSaving||!profileGender" (click)="saveEligibility()">{{profileSaving?'Saving…':'Save & show hostels'}}</button>
+            </div>
+          } @else if (!eligibleHostels.length) {
+            <div class="ux-state">
+              <app-icon name="alert" [size]="24"></app-icon>
+              <h3>No eligible hostel is available right now</h3>
+              <p>{{ eligibilityMessage }}</p>
+            </div>
+          } @else {
+            <div class="ux-grid">
+              @for (hostel of eligibleHostels; track hostel.hostelId) {
+                <button class="ux-card-select" (click)="openHostel(hostel)">
+                  <span class="ux-icon-box"><app-icon name="hostels" [size]="18"></app-icon></span>
+                  <div class="ux-meta"><span class="ux-chip">{{ hostel.hostelType || 'Hostel' }}</span></div>
+                  <h3>{{ hostel.hostelName }}</h3>
+                  <p>{{ hostel.description || 'Open the hostel to check floors, rooms and available beds.' }}</p>
+                  <span class="ux-text-button">View hostel →</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="ux-detail-head">
+          <div>
+            <button class="ux-back" (click)="back()">← Back</button>
+            <h2>{{ selectedHostel.hostelName }}</h2>
+            <p>
+              @if (!selectedFloor) {
+                Choose a floor to continue.
+              } @else if (!selectedRoom) {
+                Choose an available room.
+              } @else if (!selectedBed) {
+                Choose an available bed.
+              } @else if (!hold) {
+                Review your selected bed and place a temporary hold.
+              } @else {
+                Complete the short hostel application before your hold expires.
+              }
+            </p>
+          </div>
+        </div>
+
+        <div class="ux-detail-body">
+          <div class="ux-stepper" style="margin-bottom: 18px">
+            <span class="active"><b>1</b> Hostel</span>
+            <span [class.active]="selectedFloor"><b>2</b> Floor</span>
+            <span [class.active]="selectedRoom"><b>3</b> Room</span>
+            <span [class.active]="selectedBed"><b>4</b> Bed</span>
+            <span [class.active]="hold"><b>5</b> Application</span>
+          </div>
+
+          @if (!selectedFloor) {
+            <div class="ux-grid">
+              @for (floor of selectedHostel.floors; track floor.floorId) {
+                <button class="ux-card-select" (click)="selectFloor(floor)">
+                  <h3>{{ floor.name || ('Floor ' + floor.floorNumber) }}</h3>
+                  <p>{{ floor.rooms.length }} rooms</p>
+                  <span class="ux-text-button">View rooms →</span>
+                </button>
+              }
+            </div>
+          } @else if (!selectedRoom) {
+            <div class="ux-grid">
+              @for (room of selectedFloor.rooms; track room.roomId) {
+                <button class="ux-card-select" [disabled]="!room.isAvailable" (click)="selectRoom(room)">
+                  <div class="ux-meta">
+                    <span class="ux-chip" [class.success]="room.isAvailable">
+                      {{ room.isAvailable ? 'Available' : 'Full' }}
+                    </span>
+                    <span class="ux-chip">{{ room.roomType }}</span>
+                  </div>
+                  <h3>Room {{ room.roomNumber }}</h3>
+                  <p>{{ availableBeds(room) }} of {{ room.capacity }} beds currently available</p>
+                </button>
+              }
+            </div>
+          } @else if (!hold) {
+            <div class="ux-card ux-panel">
+              <h3 style="margin-top: 0">Room {{ selectedRoom.roomNumber }} · choose a bed</h3>
+
+              <div class="seat-grid">
+                @for (bed of selectedRoom.beds; track bed.bedId) {
+                  <button
+                    class="seat-button"
+                    [class.booked]="!bed.isAvailable"
+                    [class.selected]="selectedBed?.bedId === bed.bedId"
+                    [disabled]="!bed.isAvailable"
+                    (click)="selectBed(bed)"
+                  >
+                    Bed {{ bed.bedNumber }}
+                  </button>
+                }
+              </div>
+
+              <div class="seat-legend">
+                <span><i></i>Available</span>
+                <span class="selected"><i></i>Selected</span>
+                <span class="booked"><i></i>Occupied / held</span>
+              </div>
+
+              @if (selectedBed) {
+                <div class="ux-toolbar" style="margin-top: 18px">
+                  <span class="ux-chip">Selected bed {{ selectedBed.bedNumber }}</span>
+                  <button class="ux-primary" (click)="holdBed()" [disabled]="actionLoading">
+                    {{ actionLoading ? 'Holding…' : 'Hold this bed' }}
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="ux-card ux-panel">
+              <div class="ux-message info" style="margin-bottom: 15px">
+                Bed {{ selectedBed?.bedNumber }} is held for you until {{ formatDate(hold.expiresAt) }}.
+              </div>
+
+              <div class="ux-form">
+                <div class="ux-form-grid">
+                  <label class="ux-field">
+                    <span>District</span>
+                    <input [(ngModel)]="district" placeholder="Your home district" />
+                  </label>
+
+                  <label class="ux-field">
+                    <span>Province</span>
+                    <input [(ngModel)]="province" placeholder="Your home province" />
+                  </label>
+                </div>
+
+                <label class="ux-field">
+                  <span>Reason / note (optional)</span>
+                  <textarea [(ngModel)]="reason" placeholder="Anything the hostel team should know"></textarea>
+                </label>
+
+                <button class="ux-primary" (click)="submitApplication()" [disabled]="actionLoading">
+                  {{ actionLoading ? 'Submitting…' : 'Submit hostel application' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    } @else if (activeView === 'applications') {
+      <div class="ux-panel">
+        <h2 style="margin-top: 0; font-size: 16px">My applications</h2>
+
+        @if (!applications.length) {
+          <div class="ux-state">
+            <app-icon name="inbox" [size]="24"></app-icon>
+            <h3>No hostel applications yet</h3>
+          </div>
+        } @else {
+          <div class="ux-list">
+            @for (app of applications; track app.hostelApplicationId) {
+              <div class="ux-list-item">
+                <div>
+                  <h4>{{ hostelName(app.hostelId) }}</h4>
+                  <p>{{ app.district }}, {{ app.province }} · Submitted {{ formatDate(app.createdAt) }}</p>
+                </div>
+                <div class="ux-meta">
+                  <span class="ux-chip">{{ app.status }}</span>
+                  @if (canCancelApplication(app)) {
+                    <button class="ux-danger" (click)="cancelApplication(app)" [disabled]="actionLoading">Cancel</button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="ux-panel">
+        <h2 style="margin-top: 0; font-size: 16px">My allocation</h2>
+
+        @if (!allocations.length) {
+          <div class="ux-state">
+            <app-icon name="hostels" [size]="24"></app-icon>
+            <h3>No active allocation yet</h3>
+            <p>Your assigned hostel room will appear here after approval and allocation.</p>
+          </div>
+        } @else {
+          <div class="ux-list">
+            @for (allocation of allocations; track allocation.hostelAllocationId) {
+              <div class="ux-list-item">
+                <div>
+                  <h4>Hostel room allocation</h4>
+                  <p>Allocated {{ formatDate(allocation.allocatedAt) }} · Status: {{ allocation.status }}</p>
+                </div>
+                <button class="ux-secondary" (click)="loadPayment(allocation)">View payment</button>
+              </div>
+
+              @if (payment?.hostelAllocationId === allocation.hostelAllocationId) {
+                <div class="ux-card ux-panel" style="margin: 8px 0">
+                  <div class="ux-toolbar">
+                    <div>
+                      <h3 style="margin: 0">Hostel fee</h3>
+                      <p style="margin: 5px 0 0; color: var(--text-2); font-size: 11px">
+                        Rs. {{ payment?.amount }} · {{ payment?.paymentStatus }}
+                      </p>
+                    </div>
+
+                    @if (payment?.paymentStatus?.toLowerCase() !== 'paid') {
+                      <button class="ux-primary" (click)="pay(allocation)" [disabled]="actionLoading">Pay hostel fee</button>
+                    } @else {
+                      <span class="ux-chip success">Paid</span>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

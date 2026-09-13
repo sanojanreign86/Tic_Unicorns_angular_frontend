@@ -1,0 +1,315 @@
+<section class="admin-page">
+  <div class="admin-hero">
+    <div>
+      <div class="ux-eyebrow">
+        <span class="ux-icon-box"><app-icon name="hostels" [size]="17" /></span>
+        HOSTEL MANAGEMENT
+      </div>
+      <h1>Hostels</h1>
+      <p>Manage each hostel as a real building: floors, rooms, beds, applications and allocations stay in one context.</p>
+    </div>
+    <button class="ux-primary" (click)="hostelModal = true">
+      <app-icon name="plus" [size]="14" /> Create hostel
+    </button>
+  </div>
+
+  @if (error) {
+    <div class="ux-message error">{{ error }}</div>
+  }
+  @if (success) {
+    <div class="ux-message success">{{ success }}</div>
+  }
+
+  @if (!selected) {
+    <section class="ux-card admin-section">
+      <div class="admin-section-head">
+        <div>
+          <h2>Hostel buildings</h2>
+          <p>Open a hostel to manage its physical layout and student applications.</p>
+        </div>
+        <label class="admin-search">
+          <app-icon name="search" [size]="14" />
+          <input [(ngModel)]="search" placeholder="Search hostels" />
+        </label>
+      </div>
+
+      <div class="admin-list">
+        @for (h of filtered; track h.hostelId) {
+          <button class="admin-row" (click)="openHostel(h)">
+            <div>
+              <strong>{{ h.hostelName }}</strong>
+              <small>{{ h.description || 'Hostel accommodation' }}</small>
+            </div>
+            <div class="admin-cell">{{ h.hostelType || 'Hostel' }}</div>
+            <div class="admin-cell">{{ h.floors?.length || 0 }} floors</div>
+            <div class="admin-cell hide-lg">{{ applications.length }} applications overall</div>
+            <div class="admin-cell hide-lg">Open layout</div>
+            <span class="admin-arrow"><app-icon name="arrow-right" [size]="15" /></span>
+          </button>
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="admin-detail">
+      <div class="admin-detail-head">
+        <div>
+          <button class="ux-back" (click)="back()">← Back</button>
+          <h2>{{ selected.hostelName }}</h2>
+          <p>{{ selected.hostelType || 'Hostel' }} · {{ selected.description || 'Accommodation management' }}</p>
+        </div>
+      </div>
+
+      <div class="admin-tabbar">
+        <button [class.active]="tab === 'overview'" (click)="tab = 'overview'">Overview</button>
+        <button [class.active]="tab === 'structure'" (click)="tab = 'structure'">Floors & rooms</button>
+        <button [class.active]="tab === 'applications'" (click)="tab = 'applications'">Applications</button>
+        <button [class.active]="tab === 'allocations'" (click)="tab = 'allocations'">Allocations</button>
+      </div>
+
+      @if (detailLoading) {
+        <div class="ux-state"><div class="ux-spinner"></div></div>
+      } @else if (tab === 'overview') {
+        <div class="admin-section">
+          <div class="admin-kpis">
+            <div class="admin-kpi"><span>Floors</span><strong>{{ selected.floors.length }}</strong></div>
+            <div class="admin-kpi"><span>Rooms</span><strong>{{ roomCount() }}</strong></div>
+            <div class="admin-kpi"><span>Applications</span><strong>{{ appsForHostel().length }}</strong></div>
+            <div class="admin-kpi"><span>Active allocations</span><strong>{{ allocsForHostel().length }}</strong></div>
+          </div>
+        </div>
+      } @else if (tab === 'structure') {
+        <div class="admin-section">
+          @if (!selectedFloor) {
+            <div class="admin-section-head">
+              <div>
+                <h2>Floors</h2>
+                <p>Select a floor to see rooms and bed availability.</p>
+              </div>
+              <button class="ux-secondary" (click)="floorModal = true">+ Add floor</button>
+            </div>
+
+            <div class="blueprint-floor-grid">
+              @for (f of selected.floors; track f.floorId) {
+                <button class="blueprint-card" (click)="selectedFloor = f">
+                  <h3>{{ f.name || ('Floor ' + f.floorNumber) }}</h3>
+                  <p>{{ f.rooms.length }} rooms · {{ floorAvailable(f) }} beds available</p>
+                  <span class="ux-text-button">View rooms →</span>
+                </button>
+              }
+            </div>
+          } @else if (!selectedRoom) {
+            <div class="admin-section-head">
+              <div>
+                <button class="ux-back" (click)="selectedFloor = undefined">← Floors</button>
+                <h2>{{ selectedFloor.name || ('Floor ' + selectedFloor.floorNumber) }}</h2>
+              </div>
+              <button class="ux-secondary" (click)="roomModal = true">+ Add room</button>
+            </div>
+
+            <div class="room-grid">
+              @for (r of selectedFloor.rooms; track r.roomId) {
+                <article class="room-card" [class.full]="availableBeds(r) === 0" (click)="selectedRoom = r">
+                  <h4>Room {{ r.roomNumber }}</h4>
+                  <p>{{ availableBeds(r) }} / {{ r.capacity }} beds available</p>
+                  <div class="ux-meta">
+                    <span class="ux-chip">{{ r.roomType }}</span>
+                    <span class="ux-chip" [class.danger]="availableBeds(r) === 0">
+                      {{ availableBeds(r) === 0 ? 'Full' : 'Available' }}
+                    </span>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="admin-section-head">
+              <div>
+                <button class="ux-back" (click)="selectedRoom = undefined">← Rooms</button>
+                <h2>Room {{ selectedRoom.roomNumber }}</h2>
+                <p>{{ selectedRoom.roomType }} · Capacity {{ selectedRoom.capacity }}</p>
+              </div>
+              <button class="ux-secondary" (click)="bedModal = true">+ Add bed</button>
+            </div>
+
+            <div class="bed-grid">
+              @for (b of selectedRoom.beds; track b.bedId) {
+                <button
+                  class="bed-tile"
+                  [class.occupied]="!b.isAvailable && b.status.toLowerCase() !== 'held'"
+                  [class.held]="b.status.toLowerCase() === 'held'">
+                  Bed {{ b.bedNumber }}<br />
+                  <small>{{ b.status }}</small>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      } @else if (tab === 'applications') {
+        <div class="admin-section">
+          <div class="ux-list">
+            @for (a of appsForHostel(); track a.hostelApplicationId) {
+              <button class="ux-list-item" style="width:100%; text-align:left; cursor:pointer" (click)="openReview(a)">
+                <div>
+                  <h4>{{ studentName(a.studentId) }} <small>{{ studentNumber(a.studentId) }}</small></h4>
+                  <p>{{ bedLocation(a.requestedBedId) }} · {{ a.district }}, {{ a.province }} · {{ date(a.createdAt) }}</p>
+                </div>
+                <span class="ux-chip">{{ a.status }}</span>
+              </button>
+            }
+            @if (!appsForHostel().length) {
+              <div class="admin-empty"><h3>No applications for this hostel</h3></div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="admin-section">
+          <div class="ux-list">
+            @for (a of allocsForHostel(); track a.hostelAllocationId) {
+              <div class="ux-list-item">
+                <div>
+                  <h4>{{ studentName(a.studentId) }} <small>{{ studentNumber(a.studentId) }}</small></h4>
+                  <p>{{ bedLocation(a.bedId) }} · Allocated {{ date(a.allocatedAt) }}</p>
+                </div>
+                <div class="ux-meta">
+                  <span class="ux-chip">{{ a.status }}</span>
+                  @if (a.status.toLowerCase() !== 'ended') {
+                    <button class="ux-danger" (click)="endAllocation(a)">End allocation</button>
+                  }
+                </div>
+              </div>
+            }
+            @if (!allocsForHostel().length) {
+              <div class="admin-empty"><h3>No allocations yet</h3></div>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  }
+</section>
+
+@if (hostelModal) {
+  <div class="ux-modal-backdrop" (click)="hostelModal = false">
+    <section class="ux-modal" (click)="$event.stopPropagation()">
+      <div class="ux-modal-head">
+        <h2>Create hostel</h2>
+        <button class="ux-close" (click)="hostelModal = false"><app-icon name="close" [size]="16" /></button>
+      </div>
+      <div class="ux-modal-body">
+        <div class="ux-form">
+          <label class="ux-field">
+            <span>University</span>
+            <select [(ngModel)]="hostelForm.universityId">
+              <option value="">Choose university</option>
+              @for (u of universities; track u.universityId) {
+                <option [ngValue]="u.universityId">{{ u.universityName }}</option>
+              }
+            </select>
+          </label>
+          <div class="ux-form-grid">
+            <label class="ux-field"><span>Hostel name</span><input [(ngModel)]="hostelForm.hostelName" /></label>
+            <label class="ux-field">
+              <span>Hostel type</span>
+              <select [(ngModel)]="hostelForm.hostelType"><option>Boys</option><option>Girls</option></select>
+            </label>
+          </div>
+          <label class="ux-field"><span>Description</span><textarea [(ngModel)]="hostelForm.description"></textarea></label>
+        </div>
+      </div>
+      <div class="ux-modal-foot">
+        <button class="ux-secondary" (click)="hostelModal = false">Cancel</button>
+        <button class="ux-primary" (click)="createHostel()">Create hostel</button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (floorModal) {
+  <div class="ux-modal-backdrop" (click)="floorModal = false">
+    <section class="ux-modal" (click)="$event.stopPropagation()">
+      <div class="ux-modal-head">
+        <h2>Add floor</h2>
+        <button class="ux-close" (click)="floorModal = false"><app-icon name="close" [size]="16" /></button>
+      </div>
+      <div class="ux-modal-body">
+        <div class="ux-form-grid">
+          <label class="ux-field"><span>Floor number</span><input type="number" [(ngModel)]="floorForm.floorNumber" /></label>
+          <label class="ux-field"><span>Display name</span><input [(ngModel)]="floorForm.name" /></label>
+        </div>
+      </div>
+      <div class="ux-modal-foot"><button class="ux-primary" (click)="addFloor()">Add floor</button></div>
+    </section>
+  </div>
+}
+
+@if (roomModal) {
+  <div class="ux-modal-backdrop" (click)="roomModal = false">
+    <section class="ux-modal" (click)="$event.stopPropagation()">
+      <div class="ux-modal-head">
+        <h2>Add room</h2>
+        <button class="ux-close" (click)="roomModal = false"><app-icon name="close" [size]="16" /></button>
+      </div>
+      <div class="ux-modal-body">
+        <div class="ux-form-grid">
+          <label class="ux-field"><span>Room number</span><input [(ngModel)]="roomForm.roomNumber" /></label>
+          <label class="ux-field"><span>Capacity</span><input type="number" [(ngModel)]="roomForm.capacity" /></label>
+        </div>
+        <label class="ux-field"><span>Room type</span><input [(ngModel)]="roomForm.roomType" /></label>
+      </div>
+      <div class="ux-modal-foot"><button class="ux-primary" (click)="addRoom()">Add room</button></div>
+    </section>
+  </div>
+}
+
+@if (bedModal) {
+  <div class="ux-modal-backdrop" (click)="bedModal = false">
+    <section class="ux-modal" (click)="$event.stopPropagation()">
+      <div class="ux-modal-head">
+        <h2>Add bed</h2>
+        <button class="ux-close" (click)="bedModal = false"><app-icon name="close" [size]="16" /></button>
+      </div>
+      <div class="ux-modal-body">
+        <label class="ux-field"><span>Bed label</span><input [(ngModel)]="bedForm.bedNumber" placeholder="B1" /></label>
+      </div>
+      <div class="ux-modal-foot"><button class="ux-primary" (click)="addBed()">Add bed</button></div>
+    </section>
+  </div>
+}
+
+@if (reviewModal && selectedApp) {
+  <div class="ux-modal-backdrop" (click)="reviewModal = false">
+    <section class="ux-modal" (click)="$event.stopPropagation()">
+      <div class="ux-modal-head">
+        <div>
+          <h2>{{ studentName(selectedApp.studentId) }}</h2>
+          <small>{{ studentNumber(selectedApp.studentId) }}</small>
+        </div>
+        <button class="ux-close" (click)="reviewModal = false"><app-icon name="close" [size]="16" /></button>
+      </div>
+      <div class="ux-modal-body">
+        <div class="context-note">
+          <b>Requested:</b> {{ bedLocation(selectedApp.requestedBedId) }}<br />
+          <b>Address:</b> {{ selectedApp.district }}, {{ selectedApp.province }}<br />
+          @if (selectedApp.reason) {
+            <b>Reason:</b> {{ selectedApp.reason }}
+          }
+        </div>
+        <div class="ux-form" style="margin-top:14px">
+          <label class="ux-field">
+            <span>Assign available bed</span>
+            <select [(ngModel)]="allocationBedId">
+              <option [ngValue]="undefined">Choose an available bed</option>
+              @for (b of allAvailableBeds(); track b.id) {
+                <option [ngValue]="b.id">{{ b.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="ux-modal-foot">
+        <button class="ux-danger" (click)="updateStatus('Rejected')">Reject</button>
+        <button class="ux-secondary" (click)="updateStatus('InProgress')">Mark in progress</button>
+        <button class="ux-primary" (click)="allocate()" [disabled]="!allocationBedId">Approve & assign bed</button>
+      </div>
+    </section>
+  </div>
+}
