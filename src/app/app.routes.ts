@@ -6,6 +6,13 @@ export const routes: Routes = [
   ...authRoutes,
 
   {
+    path: 'complaints',
+    loadComponent: () =>
+      import('./features/complaints/pages/complaint-list/complaint-list.component')
+        .then(m => m.ComplaintListComponent)
+  },
+
+  {
     path: 'gym',
     loadChildren: () =>
       import('./features/gym/gym.routes')

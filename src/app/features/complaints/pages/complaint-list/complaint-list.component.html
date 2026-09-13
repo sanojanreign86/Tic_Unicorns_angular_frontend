@@ -1,0 +1,128 @@
+<div class="complaint-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>My Complaints</h1>
+      <p>View and track your submitted complaints</p>
+    </div>
+
+    <button
+  class="primary-btn"
+  (click)="createComplaint()">
+  + New Complaint
+</button>
+  </div>
+
+<!-- Status Filters -->
+<div class="filters">
+  <button
+    [class.active]="selectedStatus === 'All'"
+    (click)="selectStatus('All')">
+    All
+  </button>
+
+  <button
+    [class.active]="selectedStatus === 'Submitted'"
+    (click)="selectStatus('Submitted')">
+    Pending
+  </button>
+
+  <button
+    [class.active]="selectedStatus === 'InProgress'"
+    (click)="selectStatus('InProgress')">
+    In Progress
+  </button>
+
+  <button
+    [class.active]="selectedStatus === 'Resolved'"
+    (click)="selectStatus('Resolved')">
+    Resolved
+  </button>
+</div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="state-card">
+      <div class="spinner"></div>
+      <p>Loading complaints...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (errorMessage) {
+    <div class="state-card error-state">
+      <h3>Something went wrong</h3>
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if (filteredComplaints.length === 0) {
+    <div class="state-card empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No complaints found</h3>
+
+      @if (selectedStatus === 'All') {
+        <p>You haven't submitted any complaints yet.</p>
+      } @else {
+        <p>No complaints found for this status.</p>
+      }
+
+      <button
+  class="primary-btn"
+  (click)="createComplaint()">
+  Submit a Complaint
+</button>
+    </div>
+  }
+
+  <!-- Complaint List -->
+  @else {
+    <div class="complaint-list">
+
+      @for (complaint of filteredComplaints; track complaint.complaintId) {
+        <article class="complaint-card">
+
+          <div class="complaint-top">
+            <div>
+              <span class="complaint-id">
+                #{{ complaint.complaintId }}
+              </span>
+
+              <h2>{{ complaint.title }}</h2>
+            </div>
+
+            <span
+              class="status-badge"
+              [class.pending]="complaint.status === 'Pending'"
+              [class.in-progress]="complaint.status === 'In Progress'"
+              [class.resolved]="complaint.status === 'Resolved'">
+              {{ complaint.status }}
+            </span>
+          </div>
+
+          <p class="description">
+            {{ complaint.description }}
+          </p>
+
+          <div class="complaint-footer">
+            <span>
+              Submitted:
+              {{ complaint.createdAt | date:'mediumDate' }}
+            </span>
+
+           <button
+  class="view-btn"
+  (click)="viewComplaint(complaint.complaintId)">
+  View Details →
+</button>
+          </div>
+
+        </article>
+      }
+
+    </div>
+  }
+
+</div>
