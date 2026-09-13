@@ -1,0 +1,122 @@
+<div class="certificate-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1>Certificates</h1>
+        <p>Request and manage your academic certificates.</p>
+      </div>
+  
+      <button
+  class="primary-button"
+  (click)="goToRequestPage()"
+>
+  + Request Certificate
+</button>
+    </div>
+  
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="state-card">
+        <div class="loader"></div>
+        <p>Loading certificates...</p>
+      </div>
+    }
+  
+    <!-- Error State -->
+    @else if (hasError) {
+      <div class="state-card error-state">
+        <h3>Unable to load certificates</h3>
+        <p>Something went wrong while loading your certificates.</p>
+  
+        <button class="secondary-button" (click)="loadCertificates()">
+          Try Again
+        </button>
+      </div>
+    }
+  
+    <!-- Empty State -->
+    @else if (certificates.length === 0) {
+      <div class="state-card empty-state">
+        <div class="empty-icon">📄</div>
+        <h3>No certificates found</h3>
+        <p>You haven't requested any certificates yet.</p>
+  
+        <button
+  class="primary-button"
+  (click)="goToRequestPage()"
+>
+  Request Certificate
+</button>
+      </div>
+    }
+  
+    <!-- Certificate List -->
+    @else {
+      <div class="certificate-card">
+  
+        <div class="card-header">
+          <div>
+            <h2>My Certificates</h2>
+            <p>{{ certificates.length }} certificate(s)</p>
+          </div>
+        </div>
+  
+        <div class="table-container">
+  
+          <table>
+            <thead>
+              <tr>
+                <th>Certificate Type</th>
+                <th>Purpose</th>
+                <th>Requested Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+  
+            <tbody>
+              @for (certificate of certificates; track certificate.certificateId) {
+                <tr>
+  
+                  <td>
+                    <span class="certificate-type">
+                      {{ certificate.certificateType }}
+                    </span>
+                  </td>
+  
+                  <td>
+                    {{ certificate.purpose }}
+                  </td>
+  
+                  <td>
+                    {{ certificate.requestedAt | date:'dd MMM yyyy' }}
+                  </td>
+  
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class]="getStatusClass(certificate.status)">
+                      {{ certificate.status }}
+                    </span>
+                  </td>
+  
+                  <td>
+                    <button
+  class="view-button"
+  (click)="router.navigate(['/certificates', certificate.certificateId])">
+  View
+</button>
+                  </td>
+  
+                </tr>
+              }
+            </tbody>
+          </table>
+  
+        </div>
+  
+      </div>
+    }
+  
+  </div>

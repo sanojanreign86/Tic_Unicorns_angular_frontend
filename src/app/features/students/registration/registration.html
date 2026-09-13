@@ -1,0 +1,191 @@
+<div class="registration-page">
+  <div class="registration-card">
+
+    <div class="registration-header">
+      <h1>Student Registration</h1>
+      <p>Create your campus service portal account</p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div
+        class="step"
+        [class.active]="currentStep >= 1"
+        [class.completed]="currentStep > 1"
+      >
+        <span>1</span>
+        <small>Details</small>
+      </div>
+
+      <div class="step-line"></div>
+
+      <div
+        class="step"
+        [class.active]="currentStep >= 2"
+      >
+        <span>2</span>
+        <small>Verify OTP</small>
+      </div>
+    </div>
+
+    @if (errorMessage) {
+      <div class="message error-message" role="alert">
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="message success-message" role="status">
+        {{ successMessage }}
+      </div>
+    }
+
+    @if (currentStep === 1) {
+      <form
+        [formGroup]="registrationForm"
+        (ngSubmit)="sendOtp()"
+        class="registration-form"
+      >
+        <div class="form-group">
+          <label for="universityStudentId">
+            University Student ID
+          </label>
+
+          <input
+            id="universityStudentId"
+            type="text"
+            formControlName="universityStudentId"
+            placeholder="Enter your university student ID"
+            autocomplete="username"
+          />
+
+          @if (
+            registrationForm.controls.universityStudentId.touched &&
+            registrationForm.controls.universityStudentId.hasError('required')
+          ) {
+            <small class="field-error">
+              University Student ID is required.
+            </small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="mobileNumber">
+            Mobile Number
+          </label>
+
+          <input
+            id="mobileNumber"
+            type="tel"
+            formControlName="mobileNumber"
+            placeholder="Enter your registered mobile number"
+            autocomplete="tel"
+          />
+
+          @if (
+            registrationForm.controls.mobileNumber.touched &&
+            registrationForm.controls.mobileNumber.hasError('required')
+          ) {
+            <small class="field-error">
+              Mobile number is required.
+            </small>
+          }
+
+          @if (
+            registrationForm.controls.mobileNumber.touched &&
+            registrationForm.controls.mobileNumber.hasError('pattern')
+          ) {
+            <small class="field-error">
+              Please enter a valid mobile number.
+            </small>
+          }
+        </div>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="isLoading"
+        >
+          @if (isLoading) {
+            Sending OTP...
+          } @else {
+            Send OTP
+          }
+        </button>
+      </form>
+    }
+
+    @if (currentStep === 2) {
+      <form
+        [formGroup]="otpForm"
+        (ngSubmit)="verifyOtp()"
+        class="registration-form"
+      >
+        <div class="otp-info">
+          <h3>Verify your mobile number</h3>
+          <p>
+            Enter the 6-digit OTP sent to your registered mobile number.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="otp">
+            OTP
+          </label>
+
+          <input
+            id="otp"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            formControlName="otp"
+            placeholder="Enter 6-digit OTP"
+            autocomplete="one-time-code"
+          />
+
+          @if (
+            otpForm.controls.otp.touched &&
+            otpForm.controls.otp.hasError('required')
+          ) {
+            <small class="field-error">
+              OTP is required.
+            </small>
+          }
+
+          @if (
+            otpForm.controls.otp.touched &&
+            otpForm.controls.otp.hasError('pattern')
+          ) {
+            <small class="field-error">
+              Please enter a valid 6-digit OTP.
+            </small>
+          }
+        </div>
+
+        <div class="button-group">
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="isLoading"
+            (click)="backToRegistration()"
+          >
+            Back
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="isLoading"
+          >
+            @if (isLoading) {
+              Verifying...
+            } @else {
+              Verify OTP
+            }
+          </button>
+        </div>
+      </form>
+    }
+
+  </div>
+</div>

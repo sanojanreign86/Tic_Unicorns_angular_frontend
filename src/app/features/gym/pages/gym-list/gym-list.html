@@ -1,0 +1,184 @@
+<section class="gym-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Gym Management</h1>
+      <p>View and manage campus gym facilities.</p>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="loadGyms()"
+        [disabled]="isLoading"
+      >
+        Refresh
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="addGym()"
+      >
+        Add Gym
+      </button>
+
+    </div>
+
+  </div>
+
+
+  @if (isLoading) {
+
+    <div class="state-card">
+      <p>Loading gym information...</p>
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="state-card error-state">
+
+      <h3>Unable to load gyms</h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="primary-button retry-button"
+        (click)="loadGyms()"
+      >
+        Try Again
+      </button>
+
+    </div>
+
+  } @else if (gyms.length === 0) {
+
+    <div class="state-card">
+
+      <h3>No gyms found</h3>
+
+      <p>
+        There are currently no gym facilities available.
+      </p>
+
+      <button
+        type="button"
+        class="primary-button empty-add-button"
+        (click)="addGym()"
+      >
+        Add Gym
+      </button>
+
+    </div>
+
+  } @else {
+
+    <div class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Gym ID</th>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Capacity</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (gym of gyms; track gym.gymId) {
+
+              <tr>
+
+                <td>
+                  #{{ gym.gymId }}
+                </td>
+
+                <td>
+                  <strong>
+                    {{ gym.name }}
+                  </strong>
+                </td>
+
+                <td>
+                  {{ gym.location }}
+                </td>
+
+                <td>
+                  {{ gym.capacity }}
+                </td>
+
+                <td>
+                  {{ gym.description }}
+                </td>
+
+                <td>
+
+                  @if (gym.isActive) {
+
+                    <span class="status active">
+                      Active
+                    </span>
+
+                  } @else {
+
+                    <span class="status inactive">
+                      Inactive
+                    </span>
+
+                  }
+
+                </td>
+
+                <td>
+
+                  <div class="row-actions">
+
+                    <button
+                      type="button"
+                      class="view-button"
+                      (click)="viewGym(gym.gymId)"
+                    >
+                      View
+                    </button>
+
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="editGym(gym.gymId)"
+                    >
+                      Edit
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>

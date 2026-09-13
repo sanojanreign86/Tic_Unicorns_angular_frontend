@@ -1,0 +1,107 @@
+<div class="role-form-container">
+
+  <div class="form-header">
+    <div>
+      <h2>{{ role ? 'Edit Role' : 'Create Role' }}</h2>
+      <p>
+        {{ role
+          ? 'Update the role details below.'
+          : 'Create a new role for the campus service portal.'
+        }}
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="close-button"
+      (click)="close()"
+      aria-label="Close form"
+    >
+      ×
+    </button>
+  </div>
+
+  <form
+    [formGroup]="roleForm"
+    (ngSubmit)="submit()"
+    class="role-form"
+  >
+
+    <div class="form-group">
+      <label for="roleName">
+        Role Name
+      </label>
+
+      <input
+        id="roleName"
+        type="text"
+        formControlName="roleName"
+        placeholder="Enter role name"
+      />
+
+      @if (
+        roleForm.controls.roleName.touched &&
+        roleForm.controls.roleName.invalid
+      ) {
+        <small class="field-error">
+          Role name is required.
+        </small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="description">
+        Description
+      </label>
+
+      <textarea
+        id="description"
+        rows="4"
+        formControlName="description"
+        placeholder="Enter role description"
+      ></textarea>
+    </div>
+
+    @if (role) {
+      <div class="active-toggle">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            formControlName="isActive"
+          />
+
+          <span>
+            Active Role
+          </span>
+        </label>
+      </div>
+    }
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="close()"
+        [disabled]="isLoading"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="isLoading"
+      >
+        @if (isLoading) {
+          Saving...
+        } @else {
+          {{ role ? 'Update Role' : 'Create Role' }}
+        }
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

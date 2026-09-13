@@ -1,0 +1,70 @@
+<div class="table-wrapper">
+
+  @if (isLoading) {
+    <div class="table-state">
+      <p>Loading users...</p>
+    </div>
+  }
+
+  @else if (users.length === 0) {
+    <div class="table-state empty-state">
+      <h3>No Users Found</h3>
+      <p>There are no users available.</p>
+    </div>
+  }
+
+  @else {
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Phone Verified</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (user of users; track user.userId) {
+          <tr>
+            <td>{{ user.userId }}</td>
+
+            <td class="username">
+              {{ user.username }}
+            </td>
+
+            <td>
+              {{ user.email || '-' }}
+            </td>
+
+            <td>
+              {{ user.phoneNumber || '-' }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.active]="user.isActive"
+                [class.inactive]="!user.isActive"
+              >
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+
+            <td>
+              {{ user.isPhoneVerified ? 'Verified' : 'Not Verified' }}
+            </td>
+
+            <td>
+              {{ user.createdAt | date:'dd MMM yyyy' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

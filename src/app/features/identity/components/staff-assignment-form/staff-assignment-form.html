@@ -1,0 +1,121 @@
+<div class="assignment-form-container">
+
+  <div class="form-header">
+    <div>
+      <h2>Staff Assignment</h2>
+      <p>Assign a staff member to a department, hostel, or canteen.</p>
+    </div>
+
+    <button
+      type="button"
+      class="close-button"
+      (click)="close()"
+      aria-label="Close form"
+    >
+      ×
+    </button>
+  </div>
+
+  <form
+    [formGroup]="assignmentForm"
+    (ngSubmit)="submit()"
+    class="assignment-form"
+  >
+
+    <div class="form-group">
+      <label for="userId">
+        User ID
+      </label>
+
+      <input
+        id="userId"
+        type="number"
+        formControlName="userId"
+        placeholder="Enter staff user ID"
+        min="1"
+      />
+
+      @if (
+        assignmentForm.controls.userId.touched &&
+        assignmentForm.controls.userId.invalid
+      ) {
+        <small class="field-error">
+          Please enter a valid user ID.
+        </small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="scopeType">
+        Assignment Type
+      </label>
+
+      <select
+        id="scopeType"
+        formControlName="scopeType"
+      >
+        <option value="department">Department</option>
+        <option value="hostel">Hostel</option>
+        <option value="canteen">Canteen</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="scopeId">
+        {{ assignmentForm.controls.scopeType.value | titlecase }} ID
+      </label>
+
+      <input
+        id="scopeId"
+        type="number"
+        formControlName="scopeId"
+        placeholder="Enter scope ID"
+        min="1"
+      />
+
+      @if (
+        assignmentForm.controls.scopeId.touched &&
+        assignmentForm.controls.scopeId.invalid
+      ) {
+        <small class="field-error">
+          Please enter a valid scope ID.
+        </small>
+      }
+    </div>
+
+    <div class="form-info">
+      <strong>Assignment scope</strong>
+      <p>
+        A staff member can be assigned to one scope at a time:
+        department, hostel, or canteen.
+      </p>
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="close()"
+        [disabled]="isLoading"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="isLoading"
+      >
+        @if (isLoading) {
+          Assigning...
+        } @else {
+          Assign Staff
+        }
+      </button>
+
+    </div>
+
+  </form>
+
+</div>
