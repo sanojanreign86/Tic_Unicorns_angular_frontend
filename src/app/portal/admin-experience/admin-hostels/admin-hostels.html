@@ -41,7 +41,7 @@
               <small>{{ h.description || 'Hostel accommodation' }}</small>
             </div>
             <div class="admin-cell">{{ h.hostelType || 'Hostel' }}</div>
-            <div class="admin-cell">{{ h.floors?.length || 0 }} floors</div>
+            <div class="admin-cell">{{ h.floors.length || 0 }} floors</div>
             <div class="admin-cell hide-lg">{{ applications.length }} applications overall</div>
             <div class="admin-cell hide-lg">Open layout</div>
             <span class="admin-arrow"><app-icon name="arrow-right" [size]="15" /></span>

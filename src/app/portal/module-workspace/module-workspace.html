@@ -36,6 +36,12 @@
   <app-admin-system-settings />
 } @else if (auth.isAdmin() && moduleKey === 'gym') {
   <app-admin-gym />
+} @else if (auth.isAdmin() && moduleKey === 'certificates') {
+  <app-admin-certificates />
+} @else if (auth.isAdmin() && moduleKey === 'complaints') {
+  <app-admin-complaints />
+} @else if (auth.isAdmin() && moduleKey === 'leave') {
+  <app-admin-leave />
 } @else {
 @if (config) {
   <section class="module-page">

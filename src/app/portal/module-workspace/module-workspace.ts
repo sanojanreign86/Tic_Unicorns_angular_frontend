@@ -23,6 +23,9 @@ import { AdminCanteenComponent } from '../admin-experience/admin-canteen/admin-c
 import { AdminSportsComponent } from '../admin-experience/admin-sports/admin-sports';
 import { AdminSystemSettingsComponent } from '../admin-experience/admin-system-settings/admin-system-settings';
 import { AdminGymComponent } from '../admin-experience/admin-gym/admin-gym';
+import { AdminCertificatesComponent } from '../admin-experience/admin-certificates/admin-certificates';
+import { AdminComplaintsComponent } from '../admin-experience/admin-complaints/admin-complaints';
+import { AdminLeaveComponent } from '../admin-experience/admin-leave/admin-leave';
 
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -38,7 +41,7 @@ import {
 @Component({
   selector: 'app-module-workspace',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppIconComponent, StudentEventsComponent, StudentLabsComponent, StudentHostelsComponent, StudentCanteenComponent, StudentCertificatesComponent, StudentComplaintsComponent, StudentNotificationsComponent, StudentFeesComponent, StudentGymComponent, StudentLeaveComponent, StudentSportsComponent, AdminEventsComponent, AdminLabsComponent, AdminHostelsComponent, AdminStudentsComponent, AdminCanteenComponent, AdminSportsComponent, AdminSystemSettingsComponent, AdminGymComponent],
+  imports: [CommonModule, FormsModule, AppIconComponent, StudentEventsComponent, StudentLabsComponent, StudentHostelsComponent, StudentCanteenComponent, StudentCertificatesComponent, StudentComplaintsComponent, StudentNotificationsComponent, StudentFeesComponent, StudentGymComponent, StudentLeaveComponent, StudentSportsComponent, AdminEventsComponent, AdminLabsComponent, AdminHostelsComponent, AdminStudentsComponent, AdminCanteenComponent, AdminSportsComponent, AdminSystemSettingsComponent, AdminGymComponent, AdminCertificatesComponent, AdminComplaintsComponent, AdminLeaveComponent],
   templateUrl: './module-workspace.html',
   styleUrl: './module-workspace.css'
 })
@@ -99,7 +102,7 @@ export class ModuleWorkspaceComponent implements OnInit, OnDestroy {
       this.activeResource = undefined;
       return;
     }
-    if (this.auth.isAdmin() && ['events','labs','hostels','students','canteen','sports','system-settings','gym'].includes(this.moduleKey)) {
+    if (this.auth.isAdmin() && ['events','labs','hostels','students','canteen','sports','system-settings','gym','certificates','complaints','leave'].includes(this.moduleKey)) {
       this.resources = [];
       this.actions = [];
       this.activeResource = undefined;
@@ -225,12 +228,42 @@ export class ModuleWorkspaceComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.actionSuccess = action.successMessage;
-        this.refresh();
+        this.refreshAfterAction(action);
       },
       error: (error) => {
         this.actionError = error?.error?.message ?? error?.error ?? 'This action could not be completed.';
       }
     });
+  }
+
+
+  private refreshAfterAction(action: ActionConfig): void {
+    if (!this.resources.length) {
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // After creating/updating a record, open the resource that best matches
+    // that endpoint so the admin can immediately see the saved result.
+    // This avoids the confusing case where a record is created successfully
+    // but the UI keeps showing an unrelated first tab.
+    const actionPath = action.endpoint
+      .replace(/\{[^}]+\}/g, '')
+      .replace(/\/+$/g, '')
+      .toLowerCase();
+
+    const candidates = this.resources
+      .map((resource) => ({
+        resource,
+        path: resource.endpoint.replace(/\{[^}]+\}/g, '').replace(/\/+$/g, '').toLowerCase()
+      }))
+      .filter(({ path }) =>
+        actionPath === path || actionPath.startsWith(path + '/') || path.startsWith(actionPath + '/')
+      )
+      .sort((a, b) => b.path.length - a.path.length);
+
+    const target = candidates[0]?.resource ?? this.activeResource ?? this.resources[0];
+    if (target) this.loadResource(target);
   }
 
   displayValue(value: unknown): string {
